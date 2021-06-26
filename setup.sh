@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# rLogViewer installer v0.05.
+# rLogViewer installer v0.06.
 #
 
 #
