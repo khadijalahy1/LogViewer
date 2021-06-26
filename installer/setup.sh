@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# rLogViewer installer v0.07.
+# rLogViewer installer v0.08.
 #
 
 #
@@ -47,21 +47,20 @@ fi
 # Check if user passed the password.
 #
 echo
-echo "Welcome to rLogViewer setup v0.07."
+echo "Welcome to rLogViewer setup v0.08."
 echo
 echo "The setup will install the following packages (if not already present): rsyslog, MySQL and rsyslog-mysql."
-echo "Through the installation, two passwords are required by MySQL users: root and rsyslog."
-echo "For the sake of simplicity, you're invited to provide only one password, for both."
-echo "When the installer is done InshaAllah, you should NOT try to change the rsyslog user password, instead you must run mysql_secure_installation to secure the root user."
+echo "Since MySQL requires a password, you'll be asked to type it in before we start."
+echo "When the installer is done InshaAllah, we encourage you to run mysql_secure_installation to improve the security of your MySQL installation."
 echo "Ealaa Barakati Llah, type in the password:"
 echo
 
 while true; do
-    read -s -r -p "Password: " password
+    read -s -r -p "Password: " PASSWORD
     echo
-    read -s -r -p "Confirm password: " password2
+    read -s -r -p "Confirm password: " PASSWORD2
     echo
-    [ "$password" = "$password2" ] && break
+    [ "$PASSWORD" = "$PASSWORD2" ] && break
     echo "Passwords mismatch! Please try again."
     echo
 done
@@ -118,8 +117,8 @@ apt-get install -qqy debconf-utils
 
 echo
 echo "$(date +"%T") | 6/9 : Installing MySQL..."
-debconf-set-selections <<< "mysql-community-server mysql-community-server/root-pass password $password"
-debconf-set-selections <<< "mysql-community-server mysql-community-server/re-root-pass password $password"
+debconf-set-selections <<< "mysql-community-server mysql-community-server/root-pass password $PASSWORD"
+debconf-set-selections <<< "mysql-community-server mysql-community-server/re-root-pass password $PASSWORD"
 DEBIAN_FRONTEND=noninteractive apt-get -qqy install mysql-server
 
 #
@@ -144,36 +143,75 @@ DEBIAN_FRONTEND=noninteractive apt-get -qqy install rsyslog-mysql
 echo
 echo "$(date +"%T") | 8/9 : Setting up Syslog database..."
 
-# -p is not secure. TODO: use /etc/my.cnf.
-# To hide the warning we use a bad solution for now.
-
-# Database name and username
+#
+# Database options
+#
 DB_NAME="Syslog"
-USER_NAME="rsyslog"
+DB_USER_NAME="rsyslog"
+DB_USER_PASSWORD="${openssl rand -base64 12}" # random password : https://unix.stackexchange.com/a/306107
 
-# Create the Syslog database and set the owner to rsyslog user, the password is the same for root.
-mysql -uroot -p${password} -e "CREATE DATABASE ${DB_NAME} /*\!40100 DEFAULT CHARACTER SET utf8 */;" > /dev/null
-mysql -uroot -p${password} -e "CREATE USER ${USER_NAME}@localhost IDENTIFIED BY '${password}';" > /dev/null
-mysql -uroot -p${password} -e "GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${USER_NAME}'@'localhost';" > /dev/null
-mysql -uroot -p${password} -e "FLUSH PRIVILEGES;" > /dev/null
+#
+# It's not recommended to use the -p option to pass the password, 
+# instead we will use option files: https://dev.mysql.com/doc/refman/8.0/en/option-files.html.
+# We will use /etc/my.cnf sicne it's the first one checked.
+#
 
-# Create the SystemEvents table.
-mysql --user=${USER_NAME} -p${password} -e "USE ${DB_NAME}; CREATE TABLE SystemEvents (Message, Facility, Hostname, HostIP, Priority, DeviceReportedTime, ReceivedAt, ProgramName, SysLogTag);" > /dev/null
+# Backup the current option file if present (normally not the case)
+mv /etc/my.cnf /etc/my-old.cnf > /dev/null
+# Copy auth data
+echo "[mysqldump]" > /etc/my.cnf
+echo "user=$DB_USER_NAME" >> /etc/my.cnf
+echo "password=$DB_USER_PASSWORD" >> /etc/my.cnf
+# Change permission to prevent other users from reading it.
+chmod 600 ~/.my.cnf
+
+# Now let's create the Syslog database and give the rsyslog user full privileges.
+# After that, we create the SystemEvents table.
+# The official table is here: https://github.com/rsyslog/rsyslog/blob/master/plugins/ommysql/createDB.sql
+# But it's so confusing: the columns doesn't correspond to the properties listed in their docs. 
+# I couldn't even find the default template that could help me find out the meaning of those columns.
+# So we will go with this simple (not perfect) table (taken from the docs' examples), and add its appropriate template in rsyslog.conf.
+
+mysql -uroot -e << EOF
+CREATE DATABASE ${DB_NAME};
+CREATE USER ${DB_USER_NAME}@localhost IDENTIFIED BY '${DB_USER_PASSWORD}';
+GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${DB_USER_NAME}'@'localhost';
+FLUSH PRIVILEGES;
+
+USE ${DB_NAME};
+
+CREATE TABLE SystemEvents
+(
+    ID int unsigned not null auto_increment primary key,
+    ReceivedAt datetime NULL,
+    DeviceReportedTime datetime NULL,
+    Facility smallint NULL,
+    Priority smallint NULL,
+    Host varchar(60) NULL,
+    Message text,
+    SysLogTag varchar(60)
+);
+EOF
+
+# Delete the option file we created
+rm -f /etc/my.cnf
+# Revert the previous file if present
+mv /etc/my-old.cnf /etc/my.cnf > /dev/null
 
 #
 # Update rsyslog configuration to start writing logs into the database.
 #
 echo
-echo "$(date +"%T") | 9/9 : Updating rsyslog configuration, the current configuration is moved to /etc/rsyslog-old.conf..."
+echo "$(date +"%T") | 9/9 : Updating rsyslog configuration, the old current configuration will be moved to /etc/rsyslog-old.conf..."
 
-# Backup
+# Backup configuration
 mv /etc/rsyslog.conf /etc/rsyslog-old.conf
 
-# Update
+# Update configuration
 wget --no-cache -q -O /etc/rsyslog.conf https://gitlab.com/GZPERRA/rlogviewer/-/raw/main/installer/rsyslog.conf
 
-# Update the password
-sed -i "s/{password}/$password/" /etc/rsyslog.conf
+# Replace tag with real password
+sed -i "s/{password}/$DB_USER_PASSWORD/" /etc/rsyslog.conf
 
 # Restart the configuration
 systemctl restart rsyslog
