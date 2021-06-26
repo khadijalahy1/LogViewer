@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# rLogViewer installer v0.06.
+# rLogViewer installer v0.07.
 #
 
 #
@@ -47,10 +47,13 @@ fi
 # Check if user passed the password.
 #
 echo
-echo "Welcome to rLogViewer setup."
+echo "Welcome to rLogViewer setup v0.07."
 echo
 echo "The setup will install the following packages (if not already present): rsyslog, MySQL and rsyslog-mysql."
-echo "A password is required through the installation. Type in this password and please don't forget it:"
+echo "Through the installation, two passwords are required by MySQL users: root and rsyslog."
+echo "For the sake of simplicity, you're invited to provide only one password, for both."
+echo "When the installer is done InshaAllah, you should NOT try to change the rsyslog user password, instead you must run mysql_secure_installation to secure the root user."
+echo "Ealaa Barakati Llah, type in the password:"
 echo
 
 while true; do
@@ -141,13 +144,21 @@ DEBIAN_FRONTEND=noninteractive apt-get -qqy install rsyslog-mysql
 echo
 echo "$(date +"%T") | 8/9 : Setting up Syslog database..."
 
+# -p is not secure. TODO: use /etc/my.cnf.
+# To hide the warning we use a bad solution for now.
+
+# Database name and username
 DB_NAME="Syslog"
 USER_NAME="rsyslog"
 
-mysql -uroot -p${password} -e "CREATE DATABASE ${DB_NAME} /*\!40100 DEFAULT CHARACTER SET utf8 */;"
-mysql -uroot -p${password} -e "CREATE USER ${USER_NAME}@localhost IDENTIFIED BY '${password}';"
-mysql -uroot -p${password} -e "GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${USER_NAME}'@'localhost';"
-mysql -uroot -p${password} -e "FLUSH PRIVILEGES;"
+# Create the Syslog database and set the owner to rsyslog user, the password is the same for root.
+mysql -uroot -p${password} -e "CREATE DATABASE ${DB_NAME} /*\!40100 DEFAULT CHARACTER SET utf8 */;" > /dev/null
+mysql -uroot -p${password} -e "CREATE USER ${USER_NAME}@localhost IDENTIFIED BY '${password}';" > /dev/null
+mysql -uroot -p${password} -e "GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${USER_NAME}'@'localhost';" > /dev/null
+mysql -uroot -p${password} -e "FLUSH PRIVILEGES;" > /dev/null
+
+# Create the SystemEvents table.
+mysql --user=${USER_NAME} -p${password} -e "USE ${DB_NAME}; CREATE TABLE SystemEvents (Message, Facility, Hostname, HostIP, Priority, DeviceReportedTime, ReceivedAt, ProgramName, SysLogTag);" > /dev/null
 
 #
 # Update rsyslog configuration to start writing logs into the database.
@@ -162,7 +173,7 @@ mv /etc/rsyslog.conf /etc/rsyslog-old.conf
 wget --no-cache -q -O /etc/rsyslog.conf https://gitlab.com/GZPERRA/rlogviewer/-/raw/main/installer/rsyslog.conf
 
 # Update the password
-sed -i "s/password/$password/" /etc/rsyslog.conf
+sed -i "s/{password}/$password/" /etc/rsyslog.conf
 
 # Restart the configuration
 systemctl restart rsyslog
