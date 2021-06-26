@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# rLogViewer installer v0.02.
+# rLogViewer installer v0.03.
 #
 
 #
@@ -160,6 +160,9 @@ mv /etc/rsyslog.conf /etc/rsyslog-old.conf
 
 # Update
 wget --no-cache -O /etc/rsyslog.conf https://gitlab.com/GZPERRA/rlogviewer/-/raw/main/installer/rsyslog.conf
+
+# Update the password
+sed -i "s/password/$password/" /etc/rsyslog.conf
 
 # Reload the configuration
 systemctl reload rsyslog
