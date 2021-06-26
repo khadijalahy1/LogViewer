@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# rLogViewer installer v0.05.
+# rLogViewer installer v0.06.
 #
 
 #
@@ -47,7 +47,7 @@ fi
 # Check if user passed the password.
 #
 echo
-echo "Welcome to rLogViewer setup v0.05."
+echo "Welcome to rLogViewer setup."
 echo
 echo "The setup will install the following packages (if not already present): rsyslog, MySQL and rsyslog-mysql."
 echo "A password is required through the installation. Type in this password and please don't forget it:"
@@ -72,7 +72,7 @@ echo "$(date +"%T") | 1/9 : Running apt-get update..."
 apt-get -qqy update
 
 #
-# Install rsyslog :  https://www.rsyslog.com/ubuntu-repository/ (Although it's installed by default on Ubuntu 20.04)
+# Install rsyslog :  https://www.rsyslog.com/ubuntu-repository/ (Although it's installed by default on Ubuntu 20.06)
 #
 echo
 echo "$(date +"%T") | 2/9 : Installing rsyslog..."
@@ -159,13 +159,13 @@ echo "$(date +"%T") | 9/9 : Updating rsyslog configuration, the current configur
 mv /etc/rsyslog.conf /etc/rsyslog-old.conf
 
 # Update
-wget --no-cache -O /etc/rsyslog.conf https://gitlab.com/GZPERRA/rlogviewer/-/raw/main/installer/rsyslog.conf
+wget --no-cache -q -O /etc/rsyslog.conf https://gitlab.com/GZPERRA/rlogviewer/-/raw/main/installer/rsyslog.conf
 
 # Update the password
 sed -i "s/password/$password/" /etc/rsyslog.conf
 
-# Reload the configuration
-systemctl reload rsyslog
+# Restart the configuration
+systemctl restart rsyslog
 
 #
 # Done, Alhamulillah.
