@@ -1,10 +1,39 @@
 #!/bin/bash
+#
+# rLogViewer installer v0.04.
+#
 
+#
+# Variables
+#
+MYSQL_APT_REP_PACKAGE="mysql-apt-config_0.8.17-1_all.deb"
+MYSQL_APT_REP_DIR="/tmp/rLogViewer/"
+
+#
+# Exit on failure : https://intoli.com/blog/exit-on-errors-in-bash-scripts/
+#
+set -e
+
+#
+# keep track of the last executed command
+#
+trap 'last_command=$current_command; current_command=$BASH_COMMAND' DEBUG
+
+#
+# echo an error message before exiting
+#
+trap 'echo "\"${last_command}\" command failed with exit code $?."' EXIT
+
+#
+# Register for cleanup
+#
+trap 'rm -rf $MYSQL_APT_REP_DIR > /dev/null' EXIT
+
+#
 # It is rarely a good idea to have sudo inside scripts. 
 # Instead, remove the sudo from the script and run the script itself with sudo:
 # sudo myscript.sh
 # source: https://askubuntu.com/a/425990
-
 #
 # Check the bash shell script is being run by root
 #
@@ -17,7 +46,7 @@ fi
 # Check if user passed the password.
 #
 echo
-echo "Welcome to rsyslog-Viewer setup."
+echo "Welcome to rLogViewer setup."
 echo
 echo "The setup will install the following packages (if not already present): rsyslog, MySQL and rsyslog-mysql."
 echo "A password is required through the installation. Type in this password and please don't forget it:"
@@ -51,21 +80,27 @@ apt-get -qqy install rsyslog
 
 #
 # Install MySQL : https://dev.mysql.com/doc/mysql-apt-repo-quick-guide/en/
-# This is done by: 
-# 1- Manually install and configure the MySQL APT repository : https://dev.mysql.com/doc/mysql-apt-repo-quick-guide/en/#repo-qg-apt-repo-manual-setup
+# This is done by:
+# This does not work anymore : (1- Manually install and configure the MySQL APT repository : https://dev.mysql.com/doc/mysql-apt-repo-quick-guide/en/#repo-qg-apt-repo-manual-setup)
 #
+
+MYSQL_APT_REP_PATH=$MYSQL_APT_REP_DIR$MYSQL_APT_REP_PACKAGE
+
 echo
-echo "$(date +"%T") | 3/7 : Installing MySQL APT repository..."
-apt-key adv --keyserver pgp.mit.edu --recv-keys 5072E1F5
-cat > /etc/apt/sources.list.d/mysql.list << EOF
-deb http://repo.mysql.com/apt/ubuntu/ bionic mysql-8.0
-EOF
+echo "$(date +"%T") | 3/7 : Downloading MySQL APT repository package..."
+mkdir -p $MYSQL_APT_REP_DIR
+wget -q https://dev.mysql.com/get/$MYSQL_APT_REP_PACKAGE -O $MYSQL_APT_REP_PATH
+
+echo
+echo "$(date +"%T") | 4/7 : Installing MySQL APT repository package..."
+
+DEBIAN_FRONTEND=noninteractive dpkg --skip-same-version -i $MYSQL_APT_REP_PATH
 
 #
 # 2- Update package information from the MySQL APT repository with the following command (this step is mandatory):
 #
 echo
-echo "$(date +"%T") | 4/7 : Updating package information from the MySQL APT repository..."
+echo "$(date +"%T") | 5/7 : Updating package information from the MySQL APT repository..."
 apt-get -qqy update
 
 #
@@ -78,7 +113,7 @@ echo
 apt-get install -qqy debconf-utils
 
 echo
-echo "$(date +"%T") | 5/7 : Installing MySQL..."
+echo "$(date +"%T") | 6/7 : Installing MySQL..."
 debconf-set-selections <<< "mysql-community-server mysql-community-server/root-pass password $password"
 debconf-set-selections <<< "mysql-community-server mysql-community-server/re-root-pass password $password"
 DEBIAN_FRONTEND=noninteractive apt-get -qqy install mysql-server
@@ -93,7 +128,7 @@ DEBIAN_FRONTEND=noninteractive apt-get -qqy install mysql-server
 # The following script was generated using a method described here: https://askubuntu.com/a/859655
 #
 echo
-echo "$(date +"%T") | 6/7 : Installing rsyslog-mysql..."
+echo "$(date +"%T") | 7/7 : Installing rsyslog-mysql..."
 
 debconf-set-selections <<< "rsyslog-mysql rsyslog-mysql/password-confirm password $password"
 # MySQL application password for rsyslog-mysql:
@@ -143,3 +178,8 @@ DEBIAN_FRONTEND=noninteractive apt-get -qqy install rsyslog-mysql
 
 echo
 echo "$(date +"%T") | The setup is done."
+
+#
+# Self destruction :)
+#
+rm -- "$0"
