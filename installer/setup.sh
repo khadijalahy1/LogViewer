@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# rLogViewer installer v0.04.
+# rLogViewer installer v0.05.
 #
 
 #
@@ -47,7 +47,7 @@ fi
 # Check if user passed the password.
 #
 echo
-echo "Welcome to rLogViewer setup."
+echo "Welcome to rLogViewer setup v0.05."
 echo
 echo "The setup will install the following packages (if not already present): rsyslog, MySQL and rsyslog-mysql."
 echo "A password is required through the installation. Type in this password and please don't forget it:"
