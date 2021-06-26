@@ -1,11 +1,13 @@
 #!/bin/bash
+
 #
-# rLogViewer installer v0.04.
+# rLogViewer installer v0.05.
 #
 
 #
 # Variables
 #
+
 MYSQL_APT_REP_PACKAGE="mysql-apt-config_0.8.17-1_all.deb"
 MYSQL_APT_REP_DIR="/tmp/rLogViewer/"
 
@@ -18,7 +20,6 @@ set -e
 # keep track of the last executed command
 #
 trap 'last_command=$current_command; current_command=$BASH_COMMAND' DEBUG
-
 #
 # echo an error message before exiting
 #
@@ -29,11 +30,11 @@ trap 'echo "\"${last_command}\" command failed with exit code $?."' EXIT
 #
 trap 'rm -rf $MYSQL_APT_REP_DIR > /dev/null' EXIT
 
-#
 # It is rarely a good idea to have sudo inside scripts. 
 # Instead, remove the sudo from the script and run the script itself with sudo:
 # sudo myscript.sh
 # source: https://askubuntu.com/a/425990
+
 #
 # Check the bash shell script is being run by root
 #
@@ -94,7 +95,8 @@ wget -q https://dev.mysql.com/get/$MYSQL_APT_REP_PACKAGE -O $MYSQL_APT_REP_PATH
 echo
 echo "$(date +"%T") | 4/7 : Installing MySQL APT repository package..."
 
-DEBIAN_FRONTEND=noninteractive dpkg --skip-same-version -i $MYSQL_APT_REP_PATH
+DEBIAN_FRONTEND=noninteractive 
+dpkg --skip-same-version -i $MYSQL_APT_REP_PATH
 
 #
 # 2- Update package information from the MySQL APT repository with the following command (this step is mandatory):
