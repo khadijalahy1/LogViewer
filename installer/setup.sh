@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# rLogViewer installer v0.03.
+# rLogViewer installer v0.04.
 #
 
 #
@@ -173,8 +173,3 @@ systemctl reload rsyslog
 
 echo
 echo "$(date +"%T") | The setup is done."
-
-#
-# Self destruction :)
-#
-rm -- "$0"
