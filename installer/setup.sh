@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# rLogViewer installer v0.01.
+# rLogViewer installer v0.02.
 #
 
 #
@@ -23,7 +23,7 @@ trap 'last_command=$current_command; current_command=$BASH_COMMAND' DEBUG
 #
 # echo an error message before exiting
 #
-trap 'echo "\"${last_command}\" command failed with exit code $?."' EXIT
+trap 'echo The setup has failed due to the following command: "\"${last_command}\" [Exit code|$?]."' EXIT
 
 #
 # Register for cleanup
@@ -68,14 +68,14 @@ done
 # Use -qqy  to assume YES to all queries and do not prompt and reduce the log.
 #
 echo
-echo "$(date +"%T") | 1/7 : Running apt-get update..."
+echo "$(date +"%T") | 1/9 : Running apt-get update..."
 apt-get -qqy update
 
 #
 # Install rsyslog :  https://www.rsyslog.com/ubuntu-repository/ (Although it's installed by default on Ubuntu 20.04)
 #
 echo
-echo "$(date +"%T") | 2/7 : Installing rsyslog..."
+echo "$(date +"%T") | 2/9 : Installing rsyslog..."
 add-apt-repository -y ppa:adiscon/v8-devel
 apt-get -qqy install rsyslog 
 
@@ -88,21 +88,20 @@ apt-get -qqy install rsyslog
 MYSQL_APT_REP_PATH=$MYSQL_APT_REP_DIR$MYSQL_APT_REP_PACKAGE
 
 echo
-echo "$(date +"%T") | 3/7 : Downloading MySQL APT repository package..."
+echo "$(date +"%T") | 3/9 : Downloading MySQL APT repository package..."
 mkdir -p $MYSQL_APT_REP_DIR
 wget -q https://dev.mysql.com/get/$MYSQL_APT_REP_PACKAGE -O $MYSQL_APT_REP_PATH
 
 echo
-echo "$(date +"%T") | 4/7 : Installing MySQL APT repository package..."
+echo "$(date +"%T") | 4/9 : Installing MySQL APT repository package..."
 
-DEBIAN_FRONTEND=noninteractive 
-dpkg --skip-same-version -i $MYSQL_APT_REP_PATH
+DEBIAN_FRONTEND=noninteractive dpkg --skip-same-version -i $MYSQL_APT_REP_PATH
 
 #
 # 2- Update package information from the MySQL APT repository with the following command (this step is mandatory):
 #
 echo
-echo "$(date +"%T") | 5/7 : Updating package information from the MySQL APT repository..."
+echo "$(date +"%T") | 5/9 : Updating package information from the MySQL APT repository..."
 apt-get -qqy update
 
 #
@@ -115,7 +114,7 @@ echo
 apt-get install -qqy debconf-utils
 
 echo
-echo "$(date +"%T") | 6/7 : Installing MySQL..."
+echo "$(date +"%T") | 6/9 : Installing MySQL..."
 debconf-set-selections <<< "mysql-community-server mysql-community-server/root-pass password $password"
 debconf-set-selections <<< "mysql-community-server mysql-community-server/re-root-pass password $password"
 DEBIAN_FRONTEND=noninteractive apt-get -qqy install mysql-server
@@ -127,52 +126,43 @@ DEBIAN_FRONTEND=noninteractive apt-get -qqy install mysql-server
 
 #
 # Install rsyslog-mysql plugin.
-# The following script was generated using a method described here: https://askubuntu.com/a/859655
+# Decline dbconfig installation, the database will be manually installed.
 #
 echo
-echo "$(date +"%T") | 7/7 : Installing rsyslog-mysql..."
+echo "$(date +"%T") | 7/9 : Installing rsyslog-mysql..."
 
-debconf-set-selections <<< "rsyslog-mysql rsyslog-mysql/password-confirm password $password"
-# MySQL application password for rsyslog-mysql:
-debconf-set-selections <<< "rsyslog-mysql rsyslog-mysql/mysql/app-pass password $password "
-debconf-set-selections <<< "rsyslog-mysql rsyslog-mysql/app-password-confirm password $password "
-debconf-set-selections <<< "rsyslog-mysql rsyslog-mysql/mysql/admin-pass password $password "
-# Connection method for MySQL database of rsyslog-mysql:
-debconf-set-selections <<< "rsyslog-mysql rsyslog-mysql/mysql/method select Unix socket"
-debconf-set-selections <<< "rsyslog-mysql rsyslog-mysql/missing-db-package-error select abort"
-debconf-set-selections <<< "rsyslog-mysql rsyslog-mysql/install-error select abort"
-debconf-set-selections <<< "rsyslog-mysql rsyslog-mysql/internal/reconfiguring boolean false"
-debconf-set-selections <<< "rsyslog-mysql rsyslog-mysql/internal/skip-preseed boolean false"
-# Database type to be used by rsyslog-mysql:
-debconf-set-selections <<< "rsyslog-mysql rsyslog-mysql/database-type select mysql"
-# Perform upgrade on database for rsyslog-mysql with dbconfig-common?
-debconf-set-selections <<< "rsyslog-mysql rsyslog-mysql/dbconfig-upgrade boolean true"
-debconf-set-selections <<< "rsyslog-mysql rsyslog-mysql/passwords-do-not-match string"
-debconf-set-selections <<< "rsyslog-mysql rsyslog-mysql/mysql/admin-user string root"
-# Back up the database for rsyslog-mysql before upgrading?
-debconf-set-selections <<< "rsyslog-mysql rsyslog-mysql/upgrade-backup boolean true"
-# Deconfigure database for rsyslog-mysql with dbconfig-common?
-debconf-set-selections <<< "rsyslog-mysql rsyslog-mysql/dbconfig-remove boolean true"
-# Host name of the MySQL database server for rsyslog-mysql:
-debconf-set-selections <<< "rsyslog-mysql rsyslog-mysql/remote/host select localhost"
-debconf-set-selections <<< "rsyslog-mysql rsyslog-mysql/remote/port string"
-debconf-set-selections <<< "rsyslog-mysql rsyslog-mysql/remove-error select abort"
-debconf-set-selections <<< "rsyslog-mysql rsyslog-mysql/upgrade-error select abort"
-# MySQL username for rsyslog-mysql:
-debconf-set-selections <<< "rsyslog-mysql rsyslog-mysql/db/app-user string rsyslog@localhost"
-# Configure database for rsyslog-mysql with dbconfig-common?
-debconf-set-selections <<< "rsyslog-mysql rsyslog-mysql/dbconfig-install boolean true"
-# Reinstall database for rsyslog-mysql?
-debconf-set-selections <<< "rsyslog-mysql rsyslog-mysql/dbconfig-reinstall boolean false"
-# Host running the MySQL server for rsyslog-mysql:
-debconf-set-selections <<< "rsyslog-mysql rsyslog-mysql/remote/newhost string"
-# Delete the database for rsyslog-mysql?
-debconf-set-selections <<< "rsyslog-mysql rsyslog-mysql/purge boolean false"
-# MySQL database name for rsyslog-mysql:
-debconf-set-selections <<< "rsyslog-mysql rsyslog-mysql/db/dbname string Syslog"
-debconf-set-selections <<< "rsyslog-mysql rsyslog-mysql/mysql/authplugin select default"
-
+debconf-set-selections <<< "rsyslog-mysql rsyslog-mysql/dbconfig-install boolean false"
 DEBIAN_FRONTEND=noninteractive apt-get -qqy install rsyslog-mysql
+
+#
+# Install the databse (Syslog).
+# The database name and user name and password must be identical to the ones set in rsyslog.conf.
+#
+echo
+echo "$(date +"%T") | 8/9 : Setting up Syslog database..."
+
+DB_NAME="Syslog"
+USER_NAME="rsyslog"
+
+mysql -uroot -p${password} -e "CREATE DATABASE ${DB_NAME} /*\!40100 DEFAULT CHARACTER SET utf8 */;"
+mysql -uroot -p${password} -e "CREATE USER ${USER_NAME}@localhost IDENTIFIED BY '${password}';"
+mysql -uroot -p${password} -e "GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${USER_NAME}'@'localhost';"
+mysql -uroot -p${password} -e "FLUSH PRIVILEGES;"
+
+#
+# Update rsyslog configuration to start writing logs into the database.
+#
+echo
+echo "$(date +"%T") | 9/9 : Updating rsyslog configuration, the current configuration is moved to /etc/rsyslog-old.conf..."
+
+# Backup
+mv /etc/rsyslog.conf /etc/rsyslog-old.conf
+
+# Update
+wget --no-cache -O /etc/rsyslog.conf https://gitlab.com/GZPERRA/rlogviewer/-/raw/main/installer/rsyslog.conf
+
+# Reload the configuration
+systemctl reload rsyslog
 
 #
 # Done, Alhamulillah.
