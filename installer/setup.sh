@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# rLogViewer installer v0.11.
+# rLogViewer installer v0.12.
 #
 
 #################
@@ -60,7 +60,7 @@ trap 'rm -rf $MYSQL_APT_REP_DIR > /dev/null' EXIT
 #################
 
 echo
-echo "Welcome to rLogViewer Setup v0.11."
+echo "Welcome to rLogViewer Setup v0.12."
 echo
 echo "rLogViewer is a web based interface for viewing and analysing rsyslog logs."
 echo "The setup will install and/or update the following dependencies: rsyslog, MySQL and rsyslog-mysql."
@@ -192,7 +192,7 @@ if [ "$IS_MYSQL_INSTALLED" = false ]; then
     echo
     echo "$(date +"%T") | 4/9 : Installing MySQL APT repository package ..."
 
-    DEBIAN_FRONTEND=noninteractive dpkg --skip-same-version -i $MYSQL_APT_REP_PATH
+    DEBIAN_FRONTEND=noninteractive dpkg --skip-same-version -i $MYSQL_APT_REP_PATH > /dev/null
 
     #
     # 2- Update package information from the MySQL APT repository with the following command (this step is mandatory):
