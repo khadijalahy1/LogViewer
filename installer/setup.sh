@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# rLogViewer installer v0.12.
+# rLogViewer installer v0.13.
 #
 
 #################
@@ -60,7 +60,7 @@ trap 'rm -rf $MYSQL_APT_REP_DIR > /dev/null' EXIT
 #################
 
 echo
-echo "Welcome to rLogViewer Setup v0.12."
+echo "Welcome to rLogViewer Setup v0.13."
 echo
 echo "rLogViewer is a web based interface for viewing and analysing rsyslog logs."
 echo "The setup will install and/or update the following dependencies: rsyslog, MySQL and rsyslog-mysql."
@@ -235,13 +235,19 @@ fi
 
 #
 # Install rsyslog-mysql plugin.
-# Decline dbconfig installation, the database will be manually installed.
+# Decline dbconfig installation, the database will be "manually" installed.
 #
 echo
 echo "$(date +"%T") | 7/9 : Installing rsyslog-mysql ..."
 
 debconf-set-selections <<< "rsyslog-mysql rsyslog-mysql/dbconfig-install boolean false"
 DEBIAN_FRONTEND=noninteractive apt-get -qqy install rsyslog-mysql > /dev/null
+
+#
+# This installation creates an empty and incorrect configuration file: /etc/rsyslog.d/mysql.conf.
+# We will delete it, so even if the user wan't to include the config files at /etc/rsyslog.d, he will not get into trouble.
+# 
+rm -f /etc/rsyslog.d/mysql.conf
 
 ###########################
 #### Step 5: Create DB ####
@@ -259,7 +265,7 @@ echo "$(date +"%T") | 8/9 : Setting up Syslog database ..."
 #
 DB_NAME="Syslog"
 DB_USER_NAME="rsyslog"
-DB_USER_PASSWORD=$(openssl rand -base64 12) # random password : https://unix.stackexchange.com/a/306107
+DB_USER_PASSWORD=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c12) # random password : https://unix.stackexchange.com/questions/230673/how-to-generate-a-random-string#comment393789_230676.
 
 #
 # Now let's create the Syslog database and give the rsyslog user full privileges.
@@ -307,10 +313,10 @@ mv /etc/rsyslog.conf /etc/rsyslog-old.conf
 # Update configuration
 wget --no-cache -q -O /etc/rsyslog.conf https://gitlab.com/GZPERRA/rlogviewer/-/raw/main/installer/rsyslog.conf
 
-# Replace tag with real password
+# Update passwords
 sed -i "s/{password}/$DB_USER_PASSWORD/" /etc/rsyslog.conf
 
-# Restart the configuration
+# Restart rsyslog to reload the configuration (reload is not supported by rsyslog)
 systemctl restart rsyslog
 
 #############################
