@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# rLogViewer installer v0.08.
+# rLogViewer installer v0.09.
 #
 
 #
@@ -47,7 +47,7 @@ fi
 # Check if user passed the password.
 #
 echo
-echo "Welcome to rLogViewer setup v0.08."
+echo "Welcome to rLogViewer setup v0.09."
 echo
 echo "The setup will install the following packages (if not already present): rsyslog, MySQL and rsyslog-mysql."
 echo "Since MySQL requires a password, you'll be asked to type it in before we start."
@@ -148,7 +148,7 @@ echo "$(date +"%T") | 8/9 : Setting up Syslog database..."
 #
 DB_NAME="Syslog"
 DB_USER_NAME="rsyslog"
-DB_USER_PASSWORD="${openssl rand -base64 12}" # random password : https://unix.stackexchange.com/a/306107
+DB_USER_PASSWORD=$(openssl rand -base64 12) # random password : https://unix.stackexchange.com/a/306107
 
 #
 # It's not recommended to use the -p option to pass the password, 
