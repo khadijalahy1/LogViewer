@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# rLogViewer installer v0.10.
+# rLogViewer installer v0.11.
 #
 
 #################
@@ -60,7 +60,7 @@ trap 'rm -rf $MYSQL_APT_REP_DIR > /dev/null' EXIT
 #################
 
 echo
-echo "Welcome to rLogViewer Setup v0.10."
+echo "Welcome to rLogViewer Setup v0.11."
 echo
 echo "rLogViewer is a web based interface for viewing and analysing rsyslog logs."
 echo "The setup will install and/or update the following dependencies: rsyslog, MySQL and rsyslog-mysql."
@@ -72,9 +72,19 @@ echo
 
 #
 # Before we start, we check if MySQL is already installed:
-# Check if MySQL is installed. This helped: https://stackoverflow.com/a/2440950/10280599.
+# Check if MySQL is installed. This helped: https://stackoverflow.com/a/12137501/10280599.
+# This will threw an error if MySQL is not installed, so we temporary disable the exit on error.
 #
-IS_MYSQL_INSTALLED=$((-z "$(which mysqld)" ? false : true ))
+set +e
+
+if [[ $(which mysqld) ]]; then
+    IS_MYSQL_INSTALLED=true
+else
+    IS_MYSQL_INSTALLED=false
+fi
+
+# Get exit on error back.
+set -e
 
 #
 # If MySQL is already installed, nothing is done, since the upgrade process, even if permitted by the user, 
@@ -88,7 +98,7 @@ IS_MYSQL_INSTALLED=$((-z "$(which mysqld)" ? false : true ))
 # So we check if the root option file /root/.my.cnf is present, otherwise get the root password and create it.
 # 
 # MySQL is installed.
-if [ "$IS_MYSQL_INSTALLED" = 1 ]; then
+if [ "$IS_MYSQL_INSTALLED" = true ]; then
 
     # Check if root options file is present, otherwise get the password to create it.
     if [ ! -f /root/.my.cnf ]; then
@@ -96,7 +106,7 @@ if [ "$IS_MYSQL_INSTALLED" = 1 ]; then
         echo
         read -s -r -p "Please type in MySQL root password: " MYSQL_ROOT_PASSWD
 
-        while ! mysql -u root -p$MYSQL_ROOT_PASSWD  -e ";" ; do
+        while ! mysql -u root -p"$MYSQL_ROOT_PASSWD"  -e ";" ; do
             read -s -r -p "Can't connect, please retry: " MYSQL_ROOT_PASSWD
         done
     fi
@@ -104,6 +114,7 @@ if [ "$IS_MYSQL_INSTALLED" = 1 ]; then
 else
     echo "Since MySQL requires a password, you'll be asked to type it in before we start."
     echo "When the installer is done InshaAllah, we encourage you to run mysql_secure_installation to improve the security of your MySQL installation."
+    echo
 
     while true; do
         read -s -r -p "Password: " MYSQL_ROOT_PASSWD
@@ -120,7 +131,7 @@ fi
 # Finally, whether MySQL is installed or not, we will create the root options file is not already present. 
 #
 if [ ! -f /root/.my.cnf ]; then
-    echo "[mysqladmin]" > /root/.my.cnf
+    echo "[client]" > /root/.my.cnf
     echo "user=root" >> /root/.my.cnf
     echo "password=$MYSQL_ROOT_PASSWD" >> /root/.my.cnf
     # Change permission to prevent other users from reading it.
@@ -128,7 +139,8 @@ if [ ! -f /root/.my.cnf ]; then
 fi
 
 echo
-echo "Please ensure that this file /root/.my.cnf. is kept safe until the installation is done."
+echo "Please ensure that this file /root/.my.cnf is kept safe until the installation is done."
+echo
 echo "Installation has started, it will take a couple minutes to setup rLogViewer ..."
 echo
 
@@ -154,8 +166,8 @@ apt-get -qqy update
 #
 echo
 echo "$(date +"%T") | 2/9 : Installing rsyslog ..."
-add-apt-repository -y ppa:adiscon/v8-devel
-apt-get -qqy install rsyslog 
+add-apt-repository -y ppa:adiscon/v8-devel > /dev/null
+apt-get -qqy install rsyslog > /dev/null
 
 #######################
 #### Step 3: MySQL ####
@@ -168,7 +180,7 @@ apt-get -qqy install rsyslog
 #
 
 # MySQL in not installed.
-if [ "$IS_MYSQL_INSTALLED" = 0 ]; then
+if [ "$IS_MYSQL_INSTALLED" = false ]; then
 
     MYSQL_APT_REP_PATH=$MYSQL_APT_REP_DIR$MYSQL_APT_REP_PACKAGE
 
@@ -187,7 +199,7 @@ if [ "$IS_MYSQL_INSTALLED" = 0 ]; then
     #
     echo
     echo "$(date +"%T") | 5/9 : Updating package information from the MySQL APT repository ..."
-    apt-get -qqy update
+    apt-get -qqy update > /dev/null
 
     #
     # 3- Install MySQL Non-interactively : https://dev.mysql.com/doc/mysql-apt-repo-quick-guide/en/index.html#repo-qg-apt-repo-non-insteractive
@@ -196,13 +208,13 @@ if [ "$IS_MYSQL_INSTALLED" = 0 ]; then
     # For that we need debconf-utils. TODO: uninstall debconf-utils at the end of not already installed.
 
     echo
-    apt-get install -qqy debconf-utils
+    apt-get install -qqy debconf-utils > /dev/null
 
     echo
     echo "$(date +"%T") | 6/9 : Installing MySQL ..."
     debconf-set-selections <<< "mysql-community-server mysql-community-server/root-pass password $MYSQL_ROOT_PASSWD"
     debconf-set-selections <<< "mysql-community-server mysql-community-server/re-root-pass password $MYSQL_ROOT_PASSWD"
-    DEBIAN_FRONTEND=noninteractive apt-get -qqy install mysql-server
+    DEBIAN_FRONTEND=noninteractive apt-get -qqy install mysql-server > /dev/null
 
     #
     # TODO: Secure the installation using silently executing mysql_secure_installation: https://gist.github.com/coderua/5592d95970038944d099    
@@ -229,7 +241,11 @@ echo
 echo "$(date +"%T") | 7/9 : Installing rsyslog-mysql ..."
 
 debconf-set-selections <<< "rsyslog-mysql rsyslog-mysql/dbconfig-install boolean false"
-DEBIAN_FRONTEND=noninteractive apt-get -qqy install rsyslog-mysql
+DEBIAN_FRONTEND=noninteractive apt-get -qqy install rsyslog-mysql > /dev/null
+
+###########################
+#### Step 5: Create DB ####
+###########################
 
 #
 # Install the databse (Syslog).
@@ -254,7 +270,7 @@ DB_USER_PASSWORD=$(openssl rand -base64 12) # random password : https://unix.sta
 # So we will go with this simple (not perfect) table (taken from the docs' examples), and add its appropriate template in rsyslog.conf.
 #
 
-mysql -uroot -e << EOF
+mysql -u root << EOF
 CREATE DATABASE ${DB_NAME};
 CREATE USER ${DB_USER_NAME}@localhost IDENTIFIED BY '${DB_USER_PASSWORD}';
 GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${DB_USER_NAME}'@'localhost';
@@ -275,6 +291,10 @@ CREATE TABLE SystemEvents
 );
 EOF
 
+##############################################
+#### Step 6: Update rsyslog configuration ####
+##############################################
+
 #
 # Update rsyslog configuration to start writing logs into the database.
 #
@@ -293,9 +313,9 @@ sed -i "s/{password}/$DB_USER_PASSWORD/" /etc/rsyslog.conf
 # Restart the configuration
 systemctl restart rsyslog
 
-#
-# Done, Alhamulillah.
-#
+#############################
+#### Done, Alhamulillah. ####
+#############################
 
 echo
 echo "$(date +"%T") | The setup is done."
