@@ -1,13 +1,18 @@
 #!/bin/bash
 
 #
-# rLogViewer installer v0.13.
+# rLogViewer installer v0.14.
 #
 
 #################
 #### as Root ####
 #################
 
+#
+# It is rarely a good idea to have sudo inside scripts. 
+# Instead, remove the sudo from the script and run the script itself with sudo:
+# sudo myscript.sh
+# source: https://askubuntu.com/a/425990
 #
 # Check the bash shell script is being run by root.
 #
@@ -20,8 +25,8 @@ fi
 #### Variables ####
 ###################
 
+INTASLL_TEMP_DIR="/tmp/rLogViewer/"
 MYSQL_APT_REP_PACKAGE="mysql-apt-config_0.8.17-1_all.deb"
-MYSQL_APT_REP_DIR="/tmp/rLogViewer/"
 
 ####################
 #### Error=Exit ####
@@ -46,21 +51,16 @@ trap 'echo The setup has failed due to the following command: "\"${last_command}
 #################
 
 #
-# Register for cleanup
+# Register for cleanup: delete the installation temp dir.
 #
-trap 'rm -rf $MYSQL_APT_REP_DIR > /dev/null' EXIT
-
-# It is rarely a good idea to have sudo inside scripts. 
-# Instead, remove the sudo from the script and run the script itself with sudo:
-# sudo myscript.sh
-# source: https://askubuntu.com/a/425990
+trap 'rm -rf $INTASLL_TEMP_DIR > /dev/null' EXIT
 
 #################
 #### Welcome ####
 #################
 
 echo
-echo "Welcome to rLogViewer Setup v0.13."
+echo "Welcome to rLogViewer Setup v0.14."
 echo
 echo "rLogViewer is a web based interface for viewing and analysing rsyslog logs."
 echo "The setup will install and/or update the following dependencies: rsyslog, MySQL and rsyslog-mysql."
@@ -144,33 +144,26 @@ echo
 echo "Installation has started, it will take a couple minutes to setup rLogViewer ..."
 echo
 
-################################
-#### Step 1: apt-get update ####
-################################
-
 #
-# Get the latest package lists
-# Use -qqy  to assume YES to all queries and do not prompt and reduce the log.
+# The use of -qqy tells apt to assume YES to all queries and reduce its output.
 #
-echo
-echo "$(date +"%T") | 1/9 : Running apt-get update ..."
-apt-get -qqy update
 
 
 #########################
-#### Step 2: rsyslog ####
+#### Step 1: rsyslog ####
 #########################
 
 #
 # Install rsyslog :  https://www.rsyslog.com/ubuntu-repository/ (Although it's installed by default on Ubuntu 20.06)
 #
 echo
-echo "$(date +"%T") | 2/9 : Installing rsyslog ..."
+echo "$(date +"%T") | 1/9 : Installing rsyslog ..."
 add-apt-repository -y ppa:adiscon/v8-devel > /dev/null
+apt-get -qqy update
 apt-get -qqy install rsyslog > /dev/null
 
 #######################
-#### Step 3: MySQL ####
+#### Step 2: MySQL ####
 #######################
 
 #
@@ -182,15 +175,15 @@ apt-get -qqy install rsyslog > /dev/null
 # MySQL in not installed.
 if [ "$IS_MYSQL_INSTALLED" = false ]; then
 
-    MYSQL_APT_REP_PATH=$MYSQL_APT_REP_DIR$MYSQL_APT_REP_PACKAGE
+    MYSQL_APT_REP_PATH=$INTASLL_TEMP_DIR$MYSQL_APT_REP_PACKAGE
 
     echo
-    echo "$(date +"%T") | 3/9 : Downloading MySQL APT repository package ..."
-    mkdir -p $MYSQL_APT_REP_DIR
+    echo "$(date +"%T") | 2/9 : Downloading MySQL APT repository package ..."
+    mkdir -p $INTASLL_TEMP_DIR
     wget -q https://dev.mysql.com/get/$MYSQL_APT_REP_PACKAGE -O $MYSQL_APT_REP_PATH
 
     echo
-    echo "$(date +"%T") | 4/9 : Installing MySQL APT repository package ..."
+    echo "$(date +"%T") | 3/9 : Installing MySQL APT repository package ..."
 
     DEBIAN_FRONTEND=noninteractive dpkg --skip-same-version -i $MYSQL_APT_REP_PATH > /dev/null
 
@@ -198,7 +191,7 @@ if [ "$IS_MYSQL_INSTALLED" = false ]; then
     # 2- Update package information from the MySQL APT repository with the following command (this step is mandatory):
     #
     echo
-    echo "$(date +"%T") | 5/9 : Updating package information from the MySQL APT repository ..."
+    echo "$(date +"%T") | 4/9 : Updating package information from the MySQL APT repository ..."
     apt-get -qqy update > /dev/null
 
     #
@@ -211,7 +204,7 @@ if [ "$IS_MYSQL_INSTALLED" = false ]; then
     apt-get install -qqy debconf-utils > /dev/null
 
     echo
-    echo "$(date +"%T") | 6/9 : Installing MySQL ..."
+    echo "$(date +"%T") | 5/9 : Installing MySQL ..."
     debconf-set-selections <<< "mysql-community-server mysql-community-server/root-pass password $MYSQL_ROOT_PASSWD"
     debconf-set-selections <<< "mysql-community-server mysql-community-server/re-root-pass password $MYSQL_ROOT_PASSWD"
     DEBIAN_FRONTEND=noninteractive apt-get -qqy install mysql-server > /dev/null
@@ -222,7 +215,7 @@ if [ "$IS_MYSQL_INSTALLED" = false ]; then
 
 # MySQL in installed.
 else
-    echo "$(date +"%T") | 3-6/9 : Installing MySQL [Skipped] (A version of MySQL is already installed.)"
+    echo "$(date +"%T") | 2-5/9 : Installing MySQL [Skipped] (A version of MySQL is already installed.)"
 fi
 
 #
@@ -230,7 +223,7 @@ fi
 #
 
 ###############################
-#### Step 4: rsyslog-mysql ####
+#### Step 3: rsyslog-mysql ####
 ###############################
 
 #
@@ -238,7 +231,7 @@ fi
 # Decline dbconfig installation, the database will be "manually" installed.
 #
 echo
-echo "$(date +"%T") | 7/9 : Installing rsyslog-mysql ..."
+echo "$(date +"%T") | 6/9 : Installing rsyslog-mysql ..."
 
 debconf-set-selections <<< "rsyslog-mysql rsyslog-mysql/dbconfig-install boolean false"
 DEBIAN_FRONTEND=noninteractive apt-get -qqy install rsyslog-mysql > /dev/null
@@ -250,7 +243,7 @@ DEBIAN_FRONTEND=noninteractive apt-get -qqy install rsyslog-mysql > /dev/null
 rm -f /etc/rsyslog.d/mysql.conf
 
 ###########################
-#### Step 5: Create DB ####
+#### Step 4: Create DB ####
 ###########################
 
 #
@@ -258,7 +251,7 @@ rm -f /etc/rsyslog.d/mysql.conf
 # The database name and user name and password must be identical to the ones set in rsyslog.conf.
 #
 echo
-echo "$(date +"%T") | 8/9 : Setting up Syslog database ..."
+echo "$(date +"%T") | 7/9 : Setting up Syslog database ..."
 
 #
 # Database options
@@ -298,14 +291,14 @@ CREATE TABLE SystemEvents
 EOF
 
 ##############################################
-#### Step 6: Update rsyslog configuration ####
+#### Step 5: Update rsyslog configuration ####
 ##############################################
 
 #
 # Update rsyslog configuration to start writing logs into the database.
 #
 echo
-echo "$(date +"%T") | 9/9 : Updating rsyslog configuration, the old current configuration will be moved to /etc/rsyslog-old.conf ..."
+echo "$(date +"%T") | 8/9 : Updating rsyslog configuration, the old current configuration will be moved to /etc/rsyslog-old.conf ..."
 
 # Backup configuration
 mv /etc/rsyslog.conf /etc/rsyslog-old.conf
@@ -315,6 +308,9 @@ wget --no-cache -q -O /etc/rsyslog.conf https://gitlab.com/GZPERRA/rlogviewer/-/
 
 # Update passwords
 sed -i "s/{password}/$DB_USER_PASSWORD/" /etc/rsyslog.conf
+
+echo
+echo "$(date +"%T") | 9/9 : Restarting rsyslog service ..."
 
 # Restart rsyslog to reload the configuration (reload is not supported by rsyslog)
 systemctl restart rsyslog
