@@ -1,0 +1,20 @@
+form{
+    max-width:320px;
+    
+ }
+
+
+
+ 
+
+
+ 
+ .time-picker.open{
+    border:1px solid #DDDDDD;
+    padding:15px;
+    transition:all .5s ease;
+    height:auto;
+    background-color:#FCFCFC;
+ }
+
+
