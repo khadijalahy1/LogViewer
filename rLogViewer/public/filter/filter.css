@@ -1,0 +1,167 @@
+/*
+███████ ██ ██   ████████ ███████ ██████  
+██      ██ ██      ██    ██      ██   ██ 
+█████   ██ ██      ██    █████   ██████  
+██      ██ ██      ██    ██      ██   ██ 
+██      ██ ███████ ██    ███████ ██   ██
+*/
+
+.filter {
+    position: relative;
+    display: inline-flex;
+    width: -webkit-fill-available;
+    border-radius: 4px;
+    align-items: center;
+    background-color: white;
+    border: 1px solid #ccc;
+    padding: 5px;
+    transition: border-color 150ms;
+  }
+  
+  .filter:hover {
+    border-color: gray;
+  }
+  
+  .filter + .filter {
+    margin-left: 10px;
+  }
+  
+  .filter > img {
+    height: 25px;
+    margin: 0 10px 0 5px;
+  }
+  
+  .filter .tag {
+    cursor: pointer;
+  }
+  
+  /*
+  ███████ ███████ ██   ████████  █████   ██████  
+  ██      ██      ██      ██    ██   ██ ██       
+  ███████ █████   ██      ██    ███████ ██   ███ 
+       ██ ██      ██      ██    ██   ██ ██    ██ 
+  ███████ ███████ ███████ ██    ██   ██  ██████
+  */
+  
+  .filter > div:nth-child(2) {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  
+  .filter > div:nth-child(2)::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .filter > div:nth-child(2) > .tag {
+    transition: background-color 150ms;
+  }
+  
+  .filter > div:nth-child(2) > .tag:hover {
+    text-decoration: line-through;
+    background-color: gray;
+  }
+  
+  .filter > div:nth-child(2) > span {
+    color: #a0a0a0;
+  }
+  
+  /*
+  ██████  ██████   ██████  ██████        ██      ██ ███████ ████████ 
+  ██   ██ ██   ██ ██    ██ ██   ██       ██      ██ ██         ██    
+  ██   ██ ██████  ██    ██ ██████  █████ ██      ██ ███████    ██    
+  ██   ██ ██   ██ ██    ██ ██            ██      ██      ██    ██    
+  ██████  ██   ██  ██████  ██            ███████ ██ ███████    ██ 
+  */
+  
+  .filter > div:nth-child(3) {
+    position: absolute;
+    display: flex;
+    right: 0;
+    top: calc(100% + 14px);
+    flex-wrap: wrap;
+    background: #333333;
+    padding: 10px;
+    box-shadow: 0 5px 10px 0 grey;
+    border-radius: 10px;
+    z-index: 2;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-10px);
+    transition: opacity 150ms, transform 150ms;
+  }
+  
+  .filter > div:nth-child(3) > span {
+    display: none;
+    color: lightgray;
+  }
+  
+  .filter > div:nth-child(3)::before {
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 0;
+    right: 12px;
+    top: -12px;
+    border-left: 12px solid transparent;
+    border-right: 12px solid transparent;
+    border-bottom: 12px solid #333333;
+  }
+  
+  .filter > div:nth-child(3).dropped {
+    pointer-events: all;
+    transform: none;
+    opacity: 1;
+  }
+  
+  .filter > div:nth-child(3) > .tag {
+    transition: transform 150ms;
+  }
+  
+  .filter > div:nth-child(3) > .tag:hover {
+    transform: translateY(-3px);
+  }
+  
+  .filter > div:nth-child(3) > .tag:active {
+    transform: translateY(-1px);
+  }
+  
+  /*
+  █████  ██████  ██████  
+  ██   ██ ██   ██ ██   ██ 
+  ███████ ██   ██ ██   ██ 
+  ██   ██ ██   ██ ██   ██ 
+  ██   ██ ██████  ██████
+  */
+  
+  .filter > div:last-child {
+    min-width: 40px;
+    height: 100%;
+    margin-left: auto;
+    background-image: url(../assets/ic_add.svg);
+    background-repeat: no-repeat;
+    background-size: 16px;
+    background-position: 12px;
+    cursor: pointer;
+    transition: transform 150ms;
+  }
+  
+  .filter > div:last-child:hover {
+    transform: scale(1.1);
+  }
+  
+  .filter > div:last-child:active {
+    transform: scale(1);
+  }
+  
+  .filter > div:last-child.close {
+    transform: rotate(45deg);
+  }
+  
+  .filter > div:last-child.close:hover {
+    transform: scale(1.1) rotate(45deg);
+  }
+  
+  .filter > div:last-child.close:active {
+    transform: scale(1) rotate(45deg);
+  }
+  
