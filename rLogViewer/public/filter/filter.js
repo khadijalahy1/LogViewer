@@ -1,3 +1,10 @@
+//
+// filter.js v0.01
+// This file is part of the rLogViewer project.  
+// Copyright (c) AIAC GI17 P9 Team. All rights reserved.  
+// Licensed under the MIT License. See LICENSE file in the project root for full license information.  
+//
+
 const Filters = {
     Facility: {
       icon: "assets/facility/ic_facility.svg",
@@ -167,10 +174,6 @@ const Filters = {
   
       this.addButt.addEventListener("click", (event) => this.onAddTagsClicked(event));
   
-      for (let i = 1; i < this.dropList.children.length; i++) {
-        this.dropList.children[i].addEventListener("click", (event) => this.onDropListTagClicked(event));
-      }
-  
       FilterByTag.instances.push(this);
     }
   
@@ -188,23 +191,8 @@ const Filters = {
   
       let tags = [placeholder];
   
-      values.forEach((value) => {
-        let tag = document.createElement("DIV");
-        tag.className = "tag";
-        tag.title = "Add";
-  
-        if (value.class) {
-          tag.classList.add(value.class);
-        }
-  
-        if (value.icon) {
-          let icon = document.createElement("IMG");
-          icon.src = value.icon;
-          tag.appendChild(icon);
-        }
-  
-        tag.appendChild(document.createTextNode(value.name));
-  
+      values.forEach((value) => {        
+        let tag = FilterByTag.tagElmFromValue(value, "Add", (event) => this.onDropListTagClicked(event));
         tags.push(tag);
       });
   
@@ -260,6 +248,7 @@ const Filters = {
         this.onAddTagsClicked();
       }
     }
+
   
     static instances = [];
   
@@ -273,5 +262,33 @@ const Filters = {
     static staticConstructor = (function () {
       document.addEventListener("click", () => FilterByTag.closeDropLists());
     })();
+
+
+    // Utils:
+    static tagElmFromValue(value, tooltip, clickListener) {
+      let tag = document.createElement("DIV");
+      tag.className = "tag";
+
+      if(tooltip) {
+        tag.title = tooltip;        
+      }
+      
+      if (value.class) {
+        tag.classList.add(value.class);
+      }
+
+      if(clickListener) {
+        tag.addEventListener('click', clickListener);
+      }
+
+      if (value.icon) {
+        let icon = document.createElement("IMG");
+        icon.src = value.icon;
+        tag.appendChild(icon);
+      }
+
+      tag.appendChild(document.createTextNode(value.name));
+      return tag;
+    }
   }
   
