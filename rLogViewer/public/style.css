@@ -1,3 +1,10 @@
+/*
+ * style.css v0.01
+ * This file is part of the rLogViewer project.  
+ * Copyright (c) AIAC GI17 P9 Team. All rights reserved.  
+ * Licensed under the MIT License. See LICENSE file in the project root for full license information.  
+*/
+
 * {
   box-sizing: border-box;
   -webkit-box-sizing: border-box;
@@ -24,6 +31,14 @@ body {
   flex-direction: column;
   flex: 1;
   margin: 3vh 2vw;
+}
+
+.main > div+div {
+  margin-bottom: 10px;
+}
+
+.main > div {
+  border-radius: 10px;
 }
 
 /*
@@ -98,10 +113,8 @@ body {
   flex-direction: column;
   width: 100%;
   height: fit-content;
-  margin-bottom: 20px;
   padding: 20px;
-  background-color: #eeeeee;
-  border-radius: 10px;
+  background-color: #eeeeee;  
 }
 
 .search-container input {
@@ -134,12 +147,12 @@ body {
   background-color: #115798;
   background-image: url(./assets/ic_search.svg);
   background-repeat: no-repeat;
-  background-size: 30px;
+  background-size: 24px;
   background-position: center;
   color: #fff;
   align-self: center;  
-  width: 70px;
-  height: 100%;
+  height: 80%;
+  aspect-ratio: 1;  
   margin-left: 10px;
   border: none;
   border-radius: 10px;
@@ -170,24 +183,24 @@ body {
 ██      ██    ██ ██    ██      ██ 
 ███████  ██████   ██████  ███████ 
 */
-#page-selector {
+.page-info {
   display: flex;
   align-items: center;
-  
 }
 
-#page-selector label:first-child {
+.page-info label {
   margin-right: 10px;
-}
-
-#page-selector label:not(:first-child) {
-  margin: 0 10px 0 auto;
 }
 
 #select-page-size {
   font-size: large;
   font-family: inherit;
   border-color: lightgray;
+}
+
+#page-result-summary {
+  flex: 1;
+  text-align: center;
 }
 
 /*
@@ -267,16 +280,16 @@ table#log-page tr:not(:first-child) th {
   cursor: pointer;
 }
 
-.empty {
-  background-color: #d1d1d1;
-}
-
 .time {
   background-color: #707070;
 }
 
-.all {
-  background-color: #8a8a8a;
+.host {
+  background-color: #2d2dc0;
+}
+
+.systag {
+  background-color: #2f4f4f;
 }
 
 /*
@@ -376,102 +389,59 @@ table#log-page tr:not(:first-child) th {
 }
 
 /*
-██████   █████  ████████ ███████ 
-██   ██ ██   ██    ██    ██      
-██   ██ ███████    ██    █████   
-██   ██ ██   ██    ██    ██      
-██████  ██   ██    ██    ███████                       
-*/
-
-.datepickerdropdown {
-  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAD6CAIAAADvIroEAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAOwQAADsEBuJFr7QAAABh0RVh0U29mdHdhcmUAUGFpbnQuTkVUIHYzLjM2qefiJQAAAIhJREFUOE99w4cRgDAQBLHtvzKyyWByhjKo4E8z4vs+3vc1P8+Det836nVdqOd5oh7HgXXfd9Rt21DXdUVdlgV1nmes0zShjuOIOgwDqvcete97rF3XobZti9o0DWpd16hVVaGWZYm1KArUPM9RnXOoWZahpmmKNUkS1DiOUaMoQg3DEDUIAow/RjJ3qB92TU4AAAAASUVORK5CYII=);
-  border: 1px solid #888;
-  border-radius: 5px;
-  padding: 10px;
-  position: absolute;
-  text-align: center;
-}
-.datepickerdropdown table {
-  border-collapse: collapse;
-  margin: auto;
-}
-.datepickerdropdown input {
-  font-family: monospace;
-  border: 1px solid #888;
-  border-radius: 3px;
-  margin: 1px;
-  padding: 2px 5px;
-  text-align: center;
-}
-.datepickerdropdown table input[type="button"] {
-  width: 2em;
-}
-.datepickerdropdown input[type="button"] {
-  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAeCAIAAABi9+OQAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAAlwSFlzAAAOwwAADsMBx2+oZAAAABh0RVh0U29mdHdhcmUAUGFpbnQuTkVUIHYzLjM2qefiJQAAAElJREFUGFeNwwEGACEQQNF//6MlSRSRSMMkY86wdk+wj4e78zaz772Xcw6qioiw92atxZyTMQa9d1pr1FoppZBzJqVEjJEQwt8PXeRLuM/peRgAAAAASUVORK5CYII=);
-}
-.datepickerdropdown input[type="button"]:hover {
-  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAeCAIAAABi9+OQAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAAlwSFlzAAAOwwAADsMBx2+oZAAAABh0RVh0U29mdHdhcmUAUGFpbnQuTkVUIHYzLjM2qefiJQAAAFpJREFUGFdjePfuAgMIv3lzCoxfvTrK8OLFAYbnz/cyPHmyleHx480MDx+uY7h3bxnDnTsLGW7enMVw7dpkhqtXJzJcutTFcOFCG8O5c00MZ87UMZw6VUksBgDwaURPl4Jv2AAAAABJRU5ErkJggg==);
-}
-.datepickerdropdown input[type="button"]:active {
-  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAeCAIAAABi9+OQAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAAlwSFlzAAAOwwAADsMBx2+oZAAAABh0RVh0U29mdHdhcmUAUGFpbnQuTkVUIHYzLjM2qefiJQAAAFhJREFUGFdjOHWqkuHMmTqGc+eaGC5caGO4dKmL4erViQzXrk1muHlzFsOdOwsZ7t1bxvDw4TqGx483Mzx5spXh+fO9DC9eHGB49eoow5s3p8D43bsLpGAAr0NKhZpZNgcAAAAASUVORK5CYII=);
-  padding: 2px 4px 2px 6px;
-}
-.datepickerdropdown input.selected {
-  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAeCAIAAABi9+OQAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAAlwSFlzAAAOwwAADsMBx2+oZAAAABh0RVh0U29mdHdhcmUAUGFpbnQuTkVUIHYzLjM2qefiJQAAAEBJREFUGFdj+P//P8P//5+A+CkQXwfiU0C8B4jXA/EiIJ4CxO1AXAnEOUAcB8SBQOwCxGZArAnE0kDMB8QMxGIAwnRFxCnPkL8AAAAASUVORK5CYII=);
-}
-.datepickerdropdown input[type="text"] {
-  background: #fff;
-  color: #000;
-}
-.datepickerdropdown input.today {
-  border: 1px solid red;
-}
-.datepickerdropdown input.othermonth {
-  color: #aaa;
-  border: 1px solid #bbb;
-}
-.datepickershow img {
-  border: 0;
-}
-.monthDsp {
-  width: 80px;
-  font-size: 9px;
-}
-.daysRow {
-  font-family: sans-serif;
-  font-size: 11px;
-}
-
-/*
 ████████  █████  ██████  ██      ███████ 
    ██    ██   ██ ██   ██ ██      ██      
    ██    ███████ ██████  ██      █████   
    ██    ██   ██ ██   ██ ██      ██      
    ██    ██   ██ ██████  ███████ ███████
 */
-.table {
+#table {
+  display: none;
   border-collapse: collapse;
   width: 100%;
-  margin: 10px 0;
+  margin-bottom: 10px;
 }
 
-.table td, .table th {
-  border: 1px solid #ddd;
+#table td, #table th {
+  border: 1px solid #aaa;
   padding: 8px;  
 }
 
-.table td:nth-child(5), .table th:nth-child(5) {	
+#table td:nth-child(5), #table th:nth-child(5) {	
   white-space: pre-line;
 }
 
-.table tr:nth-child(even){background-color: #f2f2f2;}
+#table tr:nth-child(even){
+  background-color: #f2f2f2;
+}
 
-.table tr:hover {background-color: #ddd;}
+#table tr:hover {
+  background-color: #DDD;
+  cursor: pointer;
+}
 
-.table th {
+#table tr:active {
+  background-color: #CCC;
+}
+
+#table th {
   padding-top: 12px;
   padding-bottom: 12px;
   text-align: left;
   background-color: #1772c6;
   color: white;
+}
+
+#table .tag {
+  margin: 0 auto;
+}
+
+#table-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: xx-large;
+  color: lightgray;
+  width: 100%;
+  height: 100%;  
 }
