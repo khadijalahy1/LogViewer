@@ -163,6 +163,8 @@ const Main = {
   },
 
   onError: function (error) {
+    this.searchButt.disabled = false;
+    
     console.log("Fetch /getlogs failed: ", error);
   }
 };
