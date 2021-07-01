@@ -1,6 +1,6 @@
 // Converts a date into '12-Oct-1984' format
 //input: date+time , output: '12-Oct-1984' format
-
+var callendarClicked=0;
 var dateObject = {
   operator: null,
   date1: null,
@@ -36,7 +36,7 @@ function getMonthYearString(dt) {
 
 // This is the function called when the user clicks any button
 //this function is executed when choosing a date
-function chooseDate(e) {
+function chooseDate(e,) {
   console.log("function ")
   var targ; // Crossbrowser way to find the target (http://www.quirksmode.org/js/events_properties.html)
   if (!e) var e = window.event;
@@ -58,6 +58,15 @@ function chooseDate(e) {
 
   // --------INTIBAH:hahya la date li khtarina katjina 3la had chkl : 2-Jun-2021-----------------
   console.log("date chosen iiiiiiiiiis:", textbox.value)
+  console.log(dateFormat(textbox.value));
+  //I'll change the object here
+  if(callendarClicked==1){
+    dateObject.date1=dateFormat(textbox.value);
+  }
+  if(callendarClicked==2){
+    dateObject.date2=dateFormat(textbox.value);
+  }
+  
   div.parentNode.removeChild(div); // Remove the dropdown box now
   parseMyDate(textbox.value);
 }
@@ -91,9 +100,32 @@ function parseMyDate(d) {
   if (a[1] == 'Dec') m = 11;
 
 
+
   if (m < 0) return new Date(d); // Couldn't find the month
 
   return new Date(a[2], m, a[0], 0, 0, 0, 0);
+
+}
+// from  '2-Jun-2021' to 'YYYY-MM-DD'
+function dateFormat(d){
+  if (d == "") return new Date('NotADate'); // For Safari
+  var a = d.split('-');
+  if (a.length != 3) return new Date(d); // Missing 2 dashes
+  var m = 0; // Now find the month
+  if (a[1] == 'Jan') m = 1;
+  if (a[1] == 'Feb') m = 2;
+  if (a[1] == 'Mar') m = 3;
+  if (a[1] == 'Apr') m = 4;
+  if (a[1] == 'May') m = 5;
+  if (a[1] == 'Jun') m = 6;
+  if (a[1] == 'Jul') m = 7;
+  if (a[1] == 'Aug') m = 8;
+  if (a[1] == 'Sep') m = 9;
+  if (a[1] == 'Oct') m = 10;
+  if (a[1] == 'Nov') m = 11;
+  if (a[1] == 'Dec') m = 12;
+  return (a[2]+'-'+m+'-'+a[0]);
+
 
 }
 
@@ -203,6 +235,13 @@ function createCalendar(div, month) {
 //had la fonction hya lms2oola 3la dohor oL2ikhfa2 dyal date picker
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 function showDatePicker(idOfTextbox) {
+  if (idOfTextbox=="date1"){
+    callendarClicked=1;
+
+  }
+  else{
+    callendarClicked=2;
+  }
   var textbox = document.getElementById(idOfTextbox);
 
 
@@ -322,7 +361,7 @@ function showCallendar2() {
 // This is called when the page loads, it searches for inputs where the class is 'datepicker'
 
 
-class DatePicker {
+class PickerDate {
 
 
   //------should be written in an other file later------------------------------------
@@ -394,7 +433,7 @@ class DatePicker {
   selecter.addEventListener("change",onSelect);
 }
 static getDateObject(){
-  console.log("there is the date object",dateObject);
+  console.log("there is the date object that will be fetched",dateObject);
   return(dateObject);
 }
 
@@ -410,7 +449,7 @@ static getDateObject(){
 
 }
 
-DatePicker.changeDateObject();
+PickerDate.changeDateObject();
 
 
 
