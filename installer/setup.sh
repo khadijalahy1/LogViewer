@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# rLogViewer installer v0.14.
+# rLogViewer installer v0.2.
 #
 
 #################
@@ -25,8 +25,15 @@ fi
 #### Variables ####
 ###################
 
-INTASLL_TEMP_DIR="/tmp/rLogViewer/"
-MYSQL_APT_REP_PACKAGE="mysql-apt-config_0.8.17-1_all.deb"
+INSTALL_PACKAGE_URL="https://sourceforge.net/projects/rlogviewer/files/beta/rlogviewer-v0.0.1.tar.gz"
+INTASLL_TEMP_DIR="/tmp/rlogviewer"
+INSTALL_DIR="/opt"
+
+PATH_RLOGVIEWER_DIR="${INTASLL_TEMP_DIR}/rlogviewer"
+PATH_RLOGVIEWER_DB_FILE="${PATH_RLOGVIEWER_DIR}/db.js"
+PATH_RSYSLOG_CONF="${INTASLL_TEMP_DIR}/rsyslog.conf"
+PATH_SYSTEMD_UNIT="${INTASLL_TEMP_DIR}/rlogviewer.service"
+PATH_MYSQL_APT_REP_PACKAGE="${INTASLL_TEMP_DIR}/mysql-apt-config_0.8.17-1_all.deb"
 
 ####################
 #### Error=Exit ####
@@ -60,10 +67,11 @@ trap 'rm -rf $INTASLL_TEMP_DIR > /dev/null' EXIT
 #################
 
 echo
-echo "Welcome to rLogViewer Setup v0.14."
+echo "Welcome to rLogViewer Setup v0.2."
 echo
 echo "rLogViewer is a web based interface for viewing and analysing rsyslog logs."
-echo "The setup will install and/or update the following dependencies: rsyslog, MySQL and rsyslog-mysql."
+echo "The setup will install rLogViewer on your machine with the following dependencies: rsyslog, MySQL, rsyslog-mysql and nodejs."
+echo "The setup will try to update already installed packages, except for MySQL."
 echo
 
 ####################
@@ -139,31 +147,40 @@ if [ ! -f /root/.my.cnf ]; then
 fi
 
 echo
-echo "Please ensure that this file /root/.my.cnf is kept safe until the installation is done."
+echo "Please ensure that the file /root/.my.cnf is kept safe until the installation is done."
 echo
 echo "Installation has started, it will take a couple minutes to setup rLogViewer ..."
 echo
+
+###############################################
+#### Step 1: Download installation package ####
+###############################################
+
+echo
+echo "$(date +"%T") | 1/10 : Downloading rLogViewer installation package ..."
+mkdir -p $INTASLL_TEMP_DIR
+wget --no-cache -qO- $INSTALL_PACKAGE_URL | tar xz -C $INTASLL_TEMP_DIR
+
 
 #
 # The use of -qqy tells apt to assume YES to all queries and reduce its output.
 #
 
-
 #########################
-#### Step 1: rsyslog ####
+#### Step 2: rsyslog ####
 #########################
 
 #
 # Install rsyslog :  https://www.rsyslog.com/ubuntu-repository/ (Although it's installed by default on Ubuntu 20.06)
 #
 echo
-echo "$(date +"%T") | 1/9 : Installing rsyslog ..."
+echo "$(date +"%T") | 2/10 : Installing rsyslog ..."
 add-apt-repository -y ppa:adiscon/v8-devel > /dev/null
 apt-get -qqy update
 apt-get -qqy install rsyslog > /dev/null
 
 #######################
-#### Step 2: MySQL ####
+#### Step 3: MySQL ####
 #######################
 
 #
@@ -175,36 +192,32 @@ apt-get -qqy install rsyslog > /dev/null
 # MySQL in not installed.
 if [ "$IS_MYSQL_INSTALLED" = false ]; then
 
-    MYSQL_APT_REP_PATH=$INTASLL_TEMP_DIR$MYSQL_APT_REP_PACKAGE
-
+    #
+    # 1- Adding the MySQL APT Repository Non-interactively.
+    #
     echo
-    echo "$(date +"%T") | 2/9 : Downloading MySQL APT repository package ..."
-    mkdir -p $INTASLL_TEMP_DIR
-    wget -q https://dev.mysql.com/get/$MYSQL_APT_REP_PACKAGE -O $MYSQL_APT_REP_PATH
+    echo "$(date +"%T") | 3/10 : Installing MySQL APT repository package ..."
 
-    echo
-    echo "$(date +"%T") | 3/9 : Installing MySQL APT repository package ..."
-
-    DEBIAN_FRONTEND=noninteractive dpkg --skip-same-version -i $MYSQL_APT_REP_PATH > /dev/null
+    DEBIAN_FRONTEND=noninteractive dpkg --skip-same-version -i $PATH_MYSQL_APT_REP_PACKAGE > /dev/null
 
     #
     # 2- Update package information from the MySQL APT repository with the following command (this step is mandatory):
     #
     echo
-    echo "$(date +"%T") | 4/9 : Updating package information from the MySQL APT repository ..."
+    echo "$(date +"%T") | 4/10 : Updating package information from the MySQL APT repository ..."
     apt-get -qqy update > /dev/null
 
     #
     # 3- Install MySQL Non-interactively : https://dev.mysql.com/doc/mysql-apt-repo-quick-guide/en/index.html#repo-qg-apt-repo-non-insteractive
     #
 
-    # For that we need debconf-utils. TODO: uninstall debconf-utils at the end of not already installed.
+    # For that we need debconf-utils. TODO: uninstall debconf-utils at the end if it has not been installed.
 
     echo
     apt-get install -qqy debconf-utils > /dev/null
 
     echo
-    echo "$(date +"%T") | 5/9 : Installing MySQL ..."
+    echo "$(date +"%T") | 5/10 : Installing MySQL ..."
     debconf-set-selections <<< "mysql-community-server mysql-community-server/root-pass password $MYSQL_ROOT_PASSWD"
     debconf-set-selections <<< "mysql-community-server mysql-community-server/re-root-pass password $MYSQL_ROOT_PASSWD"
     DEBIAN_FRONTEND=noninteractive apt-get -qqy install mysql-server > /dev/null
@@ -215,7 +228,7 @@ if [ "$IS_MYSQL_INSTALLED" = false ]; then
 
 # MySQL in installed.
 else
-    echo "$(date +"%T") | 2-5/9 : Installing MySQL [Skipped] (A version of MySQL is already installed.)"
+    echo "$(date +"%T") | 3-5/10 : Installing MySQL [Skipped] (A version of MySQL is already installed.)"
 fi
 
 #
@@ -223,7 +236,7 @@ fi
 #
 
 ###############################
-#### Step 3: rsyslog-mysql ####
+#### Step 4: rsyslog-mysql ####
 ###############################
 
 #
@@ -231,19 +244,19 @@ fi
 # Decline dbconfig installation, the database will be "manually" installed.
 #
 echo
-echo "$(date +"%T") | 6/9 : Installing rsyslog-mysql ..."
+echo "$(date +"%T") | 6/10 : Installing rsyslog-mysql ..."
 
 debconf-set-selections <<< "rsyslog-mysql rsyslog-mysql/dbconfig-install boolean false"
 DEBIAN_FRONTEND=noninteractive apt-get -qqy install rsyslog-mysql > /dev/null
 
 #
-# This installation creates an empty and incorrect configuration file: /etc/rsyslog.d/mysql.conf.
+# This installation creates an invalid configuration file: /etc/rsyslog.d/mysql.conf.
 # We will delete it, so even if the user wan't to include the config files at /etc/rsyslog.d, he will not get into trouble.
 # 
 rm -f /etc/rsyslog.d/mysql.conf
 
 ###########################
-#### Step 4: Create DB ####
+#### Step 5: Create DB ####
 ###########################
 
 #
@@ -251,7 +264,7 @@ rm -f /etc/rsyslog.d/mysql.conf
 # The database name and user name and password must be identical to the ones set in rsyslog.conf.
 #
 echo
-echo "$(date +"%T") | 7/9 : Setting up Syslog database ..."
+echo "$(date +"%T") | 7/10 : Setting up Syslog database ..."
 
 #
 # Database options
@@ -291,29 +304,65 @@ CREATE TABLE SystemEvents
 EOF
 
 ##############################################
-#### Step 5: Update rsyslog configuration ####
+#### Step 6: Update rsyslog configuration ####
 ##############################################
 
 #
 # Update rsyslog configuration to start writing logs into the database.
 #
 echo
-echo "$(date +"%T") | 8/9 : Updating rsyslog configuration, the old current configuration will be moved to /etc/rsyslog-old.conf ..."
+echo "$(date +"%T") | 8/10 : Updating rsyslog configuration, the old current configuration will be moved to /etc/rsyslog-old.conf ..."
 
 # Backup configuration
 mv /etc/rsyslog.conf /etc/rsyslog-old.conf
 
 # Update configuration
-wget --no-cache -q -O /etc/rsyslog.conf https://gitlab.com/GZPERRA/rlogviewer/-/raw/main/installer/rsyslog.conf
+mv $PATH_RSYSLOG_CONF /etc/rsyslog.conf
 
-# Update passwords
+# Place the rsyslog user password in configuration file
 sed -i "s/{password}/$DB_USER_PASSWORD/" /etc/rsyslog.conf
 
+############################
+#### Step 7: rLogViewer ####
+############################
+
+#
+# The installation of rLogViewer consists of:
+# 1- Installing node.js
+# 2- Copying files(public, app.js) to a proper directory (/opt).
+# 3- Place rsyslog user password into the db file.
+# 4- Register rlogviewer as a service with a systemd unit file.
+#
+
 echo
-echo "$(date +"%T") | 9/9 : Restarting rsyslog service ..."
+echo "$(date +"%T") | 9/10 : Installing rLogViewer ..."
+
+# INtall node.js
+apt-get -qqy update > /dev/null
+apt-get -qqy install nodejs > /dev/null
+
+# Place the rsyslog user password in the db file
+sed -i "s/{password}/$DB_USER_PASSWORD/" $PATH_RLOGVIEWER_DB_FILE
+
+# Place server folder in installation folder
+mv $PATH_RLOGVIEWER_DIR $INSTALL_DIR
+
+# Place unit file in its location : https://www.axllent.org/docs/nodejs-service-with-systemd/
+mv $PATH_SYSTEMD_UNIT /etc/systemd/system
+
+################################
+#### Step 8: Start Services ####
+#################################
+
+echo
+echo "$(date +"%T") | 10/10 : Starting services ..."
 
 # Restart rsyslog to reload the configuration (reload is not supported by rsyslog)
-systemctl restart rsyslog
+systemctl restart rsyslog > /dev/null
+
+# Starting rLogViewer service <3
+systemctl enable rlogviewer.service > /dev/null
+systemctl start rlogviewer.service > /dev/null
 
 #############################
 #### Done, Alhamulillah. ####
