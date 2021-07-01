@@ -10,6 +10,11 @@ router.get("/", function (req, res) {
   //__dirname : It will resolve to your project folder.
   res.sendFile(path.join(__dirname, "public/index.html"));
 });
+router.get("/LogViewer", function (req, res) {
+  //__dirname : It will resolve to your project folder.
+  res.sendFile(path.join(__dirname, "public/logs.html"));
+});
+
 
 router.post("/getlogs", function (req, res) {
   // let secret = req.secret; must be given to the user when he logs in.
@@ -21,6 +26,18 @@ router.post("/getlogs", function (req, res) {
       res.status(200).json(results);
     }
   });
+});
+router.post("/Login", function (req, res) {
+  // let secret = req.secret; must be given to the user when he logs in.
+
+  if (req.body.hostname=="user" && req.body.password=="12345"){
+    res.redirect()
+
+  }
+  else{
+    res.status(500).json({ error: error });
+
+  }
 });
 
 //add the router
