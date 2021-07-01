@@ -25,7 +25,7 @@ fi
 #### Variables ####
 ###################
 
-INSTALL_PACKAGE_URL="https://sourceforge.net/projects/rlogviewer/files/beta/rlogviewer-v0.0.1.tar.gz"
+INSTALL_PACKAGE_URL="https://sourceforge.net/projects/rlogviewer/files/beta/rlogviewer-v0.0.2.tar.gz"
 INTASLL_TEMP_DIR="/tmp/rlogviewer"
 INSTALL_DIR="/opt"
 
