@@ -7,13 +7,12 @@
   --tags-focus-border-color : gray;
   --tag-text-color--edit    : #111;
   --tag-remove-bg           : var(--tag-hover);
-  --tag-pad                 : .6em 1em;
+  --tag-pad                 : 5px 8px;
   --tag-inset-shadow-size   : 1.35em;
   --tag-remove-btn-bg--hover: black;
 
   position: relative;
   display: inline-block;    
-  font-family: inherit;
   font-size: inherit;
   border-radius: 4px;
   border: 1px solid #ccc;
@@ -49,54 +48,3 @@
 .tags-look .tagify__dropdown__item:hover{
     background-color: #197bd6;
 }
-
-/*
-
-.customLook .tagify__tag {
-  margin-top: 0;
-}
-
-.customLook .tagify__tag > div {
-  border-radius: 25px;
-}
-
-.customLook .tagify__tag:only-of-type .tagify__tag__removeBtn {
-  display: none;
-}
-
-.customLook .tagify__tag__removeBtn {
-  opacity: 0;
-  transform: translateX(-6px) scale(.5);
-  margin-left: -3ch;
-  transition: .12s;
-}
-
-.customLook .tagify__tag:hover .tagify__tag__removeBtn {
-  transform: none;
-  opacity: 1;
-  margin-left: -1ch;
-}
-
-.customLook + button {
-  color: #0052BF;
-  font: bold 1.4em/1.65 Arial;
-  border: 0;
-  background: none;
-  box-shadow: 0 0 0 2px inset currentColor;
-  border-radius: 50%;
-  width: 1.65em;
-  height: 1.65em;
-  cursor: pointer;
-  outline: none;
-  transition: .1s ease-out;
-  margin: 0 0 0 5px;
-  vertical-align: top;
-}
-
-.customLook + button:hover {
-  box-shadow: 0 0 0 5px inset currentColor;
-}
-
-.customLook .tagify__input {
-  display: none;
-}*/
