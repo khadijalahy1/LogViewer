@@ -122,6 +122,7 @@ body {
   margin-top: 10px;
 }
 
+
 /*
 ███████ ███████  █████  ██████   ██████ ██   ██       ██████  ██    ██ ████████ ████████  ██████  ███    ██ 
 ██      ██      ██   ██ ██   ██ ██      ██   ██       ██   ██ ██    ██    ██       ██    ██    ██ ████   ██ 
@@ -474,4 +475,16 @@ table#log-page tr:not(:first-child) th {
   text-align: left;
   background-color: #1772c6;
   color: white;
+}
+
+#formtime {
+  max-width: 320px;
+}
+
+.time-picker.open {
+  border: 1px solid #dddddd;
+  padding: 15px;
+  transition: all 0.5s ease;
+  height: auto;
+  background-color: #fcfcfc;
 }

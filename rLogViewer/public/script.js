@@ -128,6 +128,8 @@ const Main = {
     // Date...
 
     // Time...
+    this.searchObj.time=PickerTime.getTimeObject();
+    console.log(this.searchObj.time);
 
     // Page size / index
     this.searchObj.pageSize = Pager.pageSize;

@@ -54,7 +54,67 @@
           <div id="priority"></div>
           <div id="facility"></div>
         </div>
-        <input name="input-hosts" class="host-filter" placeholder="filter by hostnames..." />        
+        <input name="input-hosts" class="host-filter" placeholder="filter by hostnames..." /> 
+        <div class="search-section">
+          <table>
+            <tr >
+              <td >
+                <select  name="timeRange" id="timeRange">
+                  <option value="BETWEEN">During this  timeRange</option>
+    
+                  <option value="=">At Time</option>
+                  <option value="<">Before Time</option>
+                  <option value=">">After Time</option>
+                </select>
+              </td>
+    
+              <td id="time1">
+                <input type="text" id="timePicker1" />
+              </td>
+    
+              <td id="time2">
+                <input type="text" id="timePicker2" />
+              </td>
+            </tr>
+          </table>
+        
+            
+        
+      
+
+        </div> 
+        <div class="search-section">
+         
+            <table>
+              <tr>
+                  <td>
+          
+                      <select name="dateRange" id="dateRange">
+                          <option value="BETWEEN"> Date Between</option>
+          
+                          <option value="=">At Date</option>
+                          <option value="<">Before Date</option>
+                          <option value=">">After Date</option>
+                          
+          
+                      </select>
+          
+                  </td>
+          
+                  <td id="date111">
+                    <input id="date1" class="datepicker"  type="text"/> 
+                   
+                    
+                  </td>
+          
+                  <td id="date2Container">
+                    <input  id="date2" class="datepicker"  type="text" /> 
+                  </td>
+              </tr>
+          </table>
+  
+        
+        </div>      
       </div>
 
       <!-- 
@@ -93,6 +153,8 @@
       </table>
     </div>
     <script src="filter/filter.js"></script>
+    <script src="pickers/datepicker.js"></script>
+    <script src="pickers/timePicker.js"></script>
     <script src="script.js"></script>
   </body>
 </html>
