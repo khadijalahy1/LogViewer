@@ -1,11 +1,20 @@
+<!-- 
+  index.html v0.01
+  This file is part of the rLogViewer project.  
+  Copyright (c) AIAC GI17 P9 Team. All rights reserved.  
+  Licensed under the MIT License. See LICENSE file in the project root for full license information.   
+-->
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="utf-8" />
     <title>rLogViewer | Home</title>
 
+    <!-- Scripts -->
     <script src="tagify/tagify.min.js"></script>
     <script src="tagify/tagify.polyfills.min.js"></script>
+    <!-- Stylesheets -->
     <link href="tagify/tagify.css" rel="stylesheet" type="text/css" />
     <link href="tagify/custom.css" rel="stylesheet" type="text/css" />
     <link href="filter/filter.css" rel="stylesheet" type="text/css" />
@@ -54,7 +63,22 @@
           <div id="priority"></div>
           <div id="facility"></div>
         </div>
-        <input name="input-hosts" class="host-filter" placeholder="filter by hostnames..." />        
+        <input name="input-hosts" class="host-filter" placeholder="filter by hostnames..." />               
+      </div>
+      
+      <!-- 
+      ██████   █████   ██████  ███████     ██ ███    ██ ███████  ██████  
+      ██   ██ ██   ██ ██       ██          ██ ████   ██ ██      ██    ██ 
+      ██████  ███████ ██   ███ █████       ██ ██ ██  ██ █████   ██    ██ 
+      ██      ██   ██ ██    ██ ██          ██ ██  ██ ██ ██      ██    ██ 
+      ██      ██   ██  ██████  ███████     ██ ██   ████ ██       ██████   -->                                                                                                                                     
+      
+      <div class="page-info">
+        <label for="select-page-index">Page:</label>
+        <select id="select-page-index" name="page-size"></select>
+        <span id="page-result-summary"></span>
+        <label for="select-page-size">Page size:</label>
+        <select id="select-page-size" name="page-size"><option value="10">10</option><option value="20">20</option><option value="20">30</option><option value="50">40</option><option value="50">50</option><option value="100">100</option></select>
       </div>
 
       <!-- 
@@ -64,20 +88,9 @@
           ██    ██   ██  ██   ██  ██       ██      
           ██    ██   ██  ██████   ███████  ███████                                                                                
          -->
-      <div id="page-selector">
-        <label for="select-page-index">Page:</label>
-        <input id="select-page-index" type="number" step="1" min="1" max="1" value="1"></input>
-        <label for="select-page-size">Page size:</label>
-        <select id="select-page-size" name="page-size">
-          <option value="10">10</option>
-          <option value="20">20</option>
-          <option value="20">30</option>
-          <option value="50">40</option>
-          <option value="50">50</option>
-          <option value="100">100</option>
-        </select>
-      </div>
-      <table class="table">
+
+      <div id="table-placeholder">Logs will appear here.</div>
+      <table id="table">
         <thead>
           <tr>
             <th>ReceivedAt</th>
@@ -96,3 +109,4 @@
     <script src="script.js"></script>
   </body>
 </html>
+
