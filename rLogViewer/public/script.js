@@ -1,18 +1,24 @@
-const FACILITIES = ["kernel", "user", "mail", "daemon", "auth", "syslog", "lpr", "cron", "authpriv", "ftp", "local"];
-const PRIORITIES = ["emergency", "alert", "critical", "error", "warning", "notice", "info", "debug"];
+//
+// script.js v0.01
+// This file is part of the rLogViewer project.  
+// Copyright (c) AIAC GI17 P9 Team. All rights reserved.  
+// Licensed under the MIT License. See LICENSE file in the project root for full license information.  
+//
 
 const Pager = {    
   pageSelector: null,
+  pageSummary: null,
   pageIndex: 0,
   pageSize: 10,
-  pageChangedListener: null,
 
   init: function (pageChangedListener) {    
     
     this.pageSelector = document.getElementById("select-page-index");
+    this.pageSummary = document.getElementById("page-result-summary");
+
     this.pageSelector.addEventListener("change", (e) => {
-      Pager.pageIndex = parseInt(e.target.value, 10)
-      pageChangedListener(Pager.pageIndex - 1);
+      Pager.pageIndex = this.pageSelector.selectedIndex;
+      pageChangedListener(Pager.pageIndex);
     });
 
     let pageSizeSelector = document.getElementById("select-page-size");
@@ -23,34 +29,61 @@ const Pager = {
     this.pageSize = parseInt(pageSizeSelector.value, 10);
   },
 
-  updatePagesCount: function (totalResults) {               
-      let max = Math.floor(totalResults / this.pageSize);
-      if( totalResults % this.pageSize > 0 ) {
-          max ++;
+  updatePageInfo: function (totalResults, summary) {        
+    
+    // This function gets called when a new result is displayed. The page index must be reset.
+    this.pageSelector.selectedIndex = 0;
+
+    let pagesCount = Math.floor(totalResults / this.pageSize);
+    if( totalResults % this.pageSize > 0 ) {
+        pagesCount ++;
+    }
+
+    let currentPagesCount = this.pageSelector.childElementCount;
+
+    if(pagesCount < currentPagesCount) {
+      for(let i = 0; i < currentPagesCount - pagesCount; i++) {
+        this.pageSelector.lastChild.remove();
       }
-      this.pageSelector.max = max;
+    } 
+    else if(pagesCount > currentPagesCount) {
+      for(let i = currentPagesCount + 1; i <= pagesCount; i++) {
+        var option = document.createElement("OPTION");
+        option.text = i.toString();
+        this.pageSelector.add(option);
+      }          
+    }
+      
+    this.pageSummary.textContent = summary;
   },
 };
 
 const Table = {
+  table: document.getElementById("table"),
   body: document.getElementById("table-body"),
+  placehoder: document.getElementById("table-placeholder"),
 
   displayLogs: function (logs) {
     this.body.innerHTML = "";
 
     logs.forEach((log) => {
         let row = this.body.insertRow();
-        row.insertCell().appendChild(document.createTextNode(log.ReceivedAt));
-        row.insertCell().appendChild(document.createTextNode(log.Host));
-        row.insertCell().appendChild(document.createTextNode(FACILITIES[log.Facility]));
-        row.insertCell().appendChild(document.createTextNode(PRIORITIES[log.Priority]));
+        row.insertCell().appendChild(FilterByTag.tagElmFromValue({'name': log.ReceivedAt.slice(0, -5), 'class': 'time'}));
+        row.insertCell().appendChild(FilterByTag.tagElmFromValue({'name': log.Host, 'class': 'host'}));
+
+        row.insertCell().appendChild(FilterByTag.tagElmFromValue(Filters.Facility.values[log.Facility], 'Add to filter'));
+        row.insertCell().appendChild(FilterByTag.tagElmFromValue(Filters.Priority.values[log.Priority], 'Add to filter'));
+
         row.insertCell().appendChild(document.createTextNode(log.Message));
-        row.insertCell().appendChild(document.createTextNode(log.SysLogTag));
-        row.insertCell().appendChild(document.createTextNode(log.DeviceReportedTime));
+        row.insertCell().appendChild(FilterByTag.tagElmFromValue({'name': log.SysLogTag, 'class': 'systag'}));
+        row.insertCell().appendChild(FilterByTag.tagElmFromValue({'name': log.DeviceReportedTime.slice(0, -5), 'class': 'time'}));
   
         Main.addHost(log.Host);
     });
-  }  
+
+    this.placehoder.style.display = 'none';
+    this.table.style.display = 'table';
+  }    
 };
 
 const Main = {
@@ -70,7 +103,7 @@ const Main = {
     // Edit whitelist:
     // hosts.whitelist = ["host1", "=host1", "!host1", "!=host1", "host2"];
     this.hosts = new Tagify(document.querySelector('input[name="input-hosts"]'), {
-      enforceWhitelist: true,
+      //enforceWhitelist: true,
       dropdown: {
         maxItems: 50, // <- mixumum allowed rendered suggestions
         classname: "tags-look", // <- custom classname for this dropdown, so it could be targeted
@@ -92,11 +125,12 @@ const Main = {
 
   addHost: function(hostname) {
       if(! this.hosts.whitelist.includes(hostname)) {
-          this.hosts.whitelist.push(hostname, '='+hostname, '!'+hostname, '!='+hostname);
+          this.hosts.whitelist.push(hostname);
       }
   },
 
   onSearch: function () {
+
     // Disable the button
     this.searchButt.disabled = true;
 
@@ -138,6 +172,8 @@ const Main = {
 
   postRequest: function(searchObj) {
 
+    this.fetchTimestamp = Date.now();
+
     fetch("/getlogs", {
         method: "POST",
         mode: "cors",
@@ -157,15 +193,16 @@ const Main = {
 
   onResult: function (json) {
     this.searchButt.disabled = false;
-    
-    Pager.updatePagesCount(json.totalResults);
+
+    Pager.updatePageInfo(json.totalResults, `Fetched ${json.totalResults} logs in ${Math.floor((Date.now() - this.fetchTimestamp)/1000)} seconds.`);
     Table.displayLogs(json.results);
   },
 
   onError: function (error) {
     this.searchButt.disabled = false;
     
-    console.log("Fetch /getlogs failed: ", error);
+    alert("Oops, something went wrong.\nCheck the devtools console for more information.");
+    console.log(error);
   }
 };
 
