@@ -1,4 +1,3 @@
-
 # rLogViewer
 ## _To Visualize The Logs_
 
@@ -19,6 +18,6 @@ sudo su -c "bash <(wget -qO- https://gitlab.com/GZPERRA/rlogviewer/-/raw/main/in
 
 MIT
 
-**Free Software, Hell Yeah!**
+**Free Software!**
 
 
