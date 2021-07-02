@@ -160,8 +160,12 @@ const Main = {
     this.searchObj.host = this.hosts.value.map((tag) => tag.value);
 
     // Date...
+    this.searchObj.date=PickerDate.getDateObject();
+    console.log(this.searchObj.date);
 
     // Time...
+    this.searchObj.time=PickerTime.getTimeObject();
+    console.log(this.searchObj.time);
 
     // Page size / index
     this.searchObj.pageSize = Pager.pageSize;

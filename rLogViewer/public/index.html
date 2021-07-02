@@ -63,7 +63,71 @@
           <div id="priority"></div>
           <div id="facility"></div>
         </div>
-        <input name="input-hosts" class="host-filter" placeholder="filter by hostnames..." />               
+       
+        <input name="input-hosts" class="host-filter" placeholder="filter by hostnames..." />  
+        <div class="search-section">
+          <table>
+            <tr >
+              <td >
+                <select  name="timeRange" id="timeRange">
+                  <option value="BETWEEN">Time Between</option>
+    
+                  <option value="=">At Time</option>
+                  <option value="<">Before Time</option>
+                  <option value=">">After Time</option>
+                </select>
+              </td>
+    
+              <td id="time1" >
+                <input type="text" id="timePicker1" class="picker"/>
+              </td>
+    
+              <td id="time2" >
+                <input type="text" id="timePicker2"class="picker" />
+              </td>
+            </tr>
+          </table>
+        
+            
+        
+      
+
+        </div> 
+        <div class="search-section">
+         
+            <table class="dateClass">
+              <tr>
+                  <td>
+          
+                      <select name="dateRange" id="dateRange" class="picker">
+                          <option value="BETWEEN"> Date Between</option>
+          
+                          <option value="=">At Date</option>
+                          <option value="<">Before Date</option>
+                          <option value=">">After Date</option>
+                          
+          
+                      </select>
+          
+                  </td>
+          
+                  <td id="date1Container">
+                    <input id="date1" class="datepicker"  type="text"/> 
+                   
+                    
+                  </td>
+          
+                  <td id="date2Container">
+                    <input  id="date2" class="datepicker"  type="text" /> 
+                  </td>
+              </tr>
+          </table>
+  
+        
+        </div>      
+        
+
+
       </div>
       
       <!-- 
@@ -79,6 +143,8 @@
         <span id="page-result-summary"></span>
         <label for="select-page-size">Page size:</label>
         <select id="select-page-size" name="page-size"><option value="10">10</option><option value="20">20</option><option value="20">30</option><option value="50">40</option><option value="50">50</option><option value="100">100</option></select>
+     
+     
       </div>
 
       <!-- 
@@ -105,6 +171,8 @@
         <tbody id="table-body"></tbody>
       </table>
     </div>
+    <script src="pickers/datepicker.js"></script>
+    <script src="pickers/timePicker.js"></script>
     <script src="filter/filter.js"></script>
     <script src="script.js"></script>
   </body>
