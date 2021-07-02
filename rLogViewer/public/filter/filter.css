@@ -1,10 +1,9 @@
 /*
- * filter.css v0.01
+ * filter.css v0.02
  * This file is part of the rLogViewer project.  
  * Copyright (c) AIAC GI17 P9 Team. All rights reserved.  
- * Licensed under the MIT License. See LICENSE file in the project root for full license information.  
+ * Licensed under the MIT License.
 */
-
 /*
 ███████ ██ ██   ████████ ███████ ██████  
 ██      ██ ██      ██    ██      ██   ██ 
@@ -16,7 +15,9 @@
 .filter {
   position: relative;
   display: inline-flex;
-  width: -webkit-fill-available;
+  width: -moz-available;          /* WebKit-based browsers will ignore this. */
+  width: -webkit-fill-available;  /* Mozilla-based browsers will ignore this. */
+  width: fill-available;
   border-radius: 4px;
   align-items: center;
   background-color: white;
