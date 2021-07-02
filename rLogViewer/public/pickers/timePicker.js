@@ -163,8 +163,8 @@ class PickerTime {
       var choice = selecter.value;
       timeObject.operator = choice;
      
-      const innerHTML1 = '<input type="text" id="timePicker1">';
-      const innerHTML2 = '<input type="text" id="timePicker2">';
+      const innerHTML1 = '<input type="text" class="picker" id="timePicker1">';
+      const innerHTML2 = '<input type="text" class="picker" id="timePicker2">';
       var time1 = document.getElementById("time1");
       var time2 = document.getElementById("time2");
 

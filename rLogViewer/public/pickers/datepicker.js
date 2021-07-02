@@ -393,8 +393,8 @@ class PickerDate {
       var choice = selecter.value;
       dateObject.operator = choice;
      
-      const innerHTML1 = '<input type="text" id="date1">';
-      const innerHTML2 = '<input type="text" id="date2">';
+      const innerHTML1 = '<input type="text" class="picker" id="date1">';
+      const innerHTML2 = '<input type="text" class="picker" id="date2">';
       var date1 = document.getElementById("date1Container");
       var date2 = document.getElementById("date2Container");
 

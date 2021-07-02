@@ -1,4 +1,5 @@
 function postRequest(hostInfos){
+    
     console.log("I'm inside post request");
     console.log("hostInfos insidePost:",hostInfos);
     console.log(JSON.stringify(hostInfos));
@@ -9,13 +10,14 @@ function postRequest(hostInfos){
         cache: "no-cache",
         credentials: "same-origin",
         headers: {
+            'Accept': 'application/json',
           "Content-Type": "application/json"
         },
         redirect: "follow",
         referrerPolicy: "no-referrer",
         body: JSON.stringify(hostInfos)
       })
-        .then((res) => res.text())
+        .then((res) => res.json())
         .then((json) => Main.onResult(json))
         .catch((error) => Main.onError(error));
 

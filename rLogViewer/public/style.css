@@ -476,7 +476,13 @@ table#log-page tr:not(:first-child) th {
   background-color: #1772c6;
   color: white;
 }
-
+/*
+████████   
+   ██       
+   ██       
+   ██         
+   ██   
+*/
 #formtime {
   max-width: 320px;
 }
@@ -487,4 +493,42 @@ table#log-page tr:not(:first-child) th {
   transition: all 0.5s ease;
   height: auto;
   background-color: #fcfcfc;
+}
+#timeRange {
+  position: relative;
+  display: inline-flex;
+  width: -webkit-fill-available;
+  border-radius: 4px;
+  align-items: center;
+  background-color: white;
+  border: 1px solid #ccc;
+  padding: 5px;
+  transition: border-color 150ms;
+}
+
+#timeRange:hover {
+  border-color: gray;
+}
+.picker{
+  position: relative;
+  display: inline-flex;
+  width: -webkit-fill-available;
+  border-radius: 4px;
+  align-items: center;
+  background-color: white;
+  border: 1px solid #ccc;
+  padding: 5px;
+  transition: border-color 150ms;
+
+}
+.datepicker{
+  position: relative;
+  display: inline-flex;
+  width: -webkit-fill-available;
+  border-radius: 4px;
+  align-items: center;
+  background-color: white;
+  border: 1px solid #ccc;
+  padding: 5px;
+  transition: border-color 150ms;
 }
