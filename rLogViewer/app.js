@@ -29,7 +29,8 @@ router.post("/getlogs", function (req, res) {
 });
 router.post("/Login", function (req, res) {
   // let secret = req.secret; must be given to the user when he logs in.
-
+  console.log("I'm in router post");
+  console.log("the infos that I've get",req.body.hostname,req.body.password);
   if (req.body.hostname=="user" && req.body.password=="12345"){
     res.redirect()
 

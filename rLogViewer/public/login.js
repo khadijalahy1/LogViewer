@@ -1,3 +1,25 @@
+function postRequest(hostInfos){
+    console.log("I'm inside post request");
+    console.log("hostInfos insidePost:",hostInfos);
+    console.log(JSON.stringify(hostInfos));
+
+    fetch("/Login", {
+        method: "POST",
+        mode: "cors",
+        cache: "no-cache",
+        credentials: "same-origin",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        redirect: "follow",
+        referrerPolicy: "no-referrer",
+        body: JSON.stringify(hostInfos)
+      })
+        .then((res) => res.text())
+        .then((json) => Main.onResult(json))
+        .catch((error) => Main.onError(error));
+
+}
 
 const Main = {
     showOrhide: function () {
@@ -25,17 +47,10 @@ const Main = {
 
 
     },
-    onLogin: function () {
-        console.log("I'm inside fetchData")
-        let hostInfos={}
-        hostInfos.hostName=this.getHostName()
-        hostInfos.password=this.getPassword()
-        console.log(hostName + "" + password);
+   
 
-
-    },
-
-    postRequest: function(hostInfos) {
+    ppostRequest: function(hostInfos) {
+        console.log("I'm inside post request");
 
         fetch("/Login", {
             method: "POST",
@@ -50,27 +65,38 @@ const Main = {
             body: JSON.stringify(hostInfos)
           })
             .then((res) => res.json())
-            .then((json) => Main.onResult(json))
+            .then(() => Main.onResult())
             .catch((error) => Main.onError(error));
       },
+      onLogin: function () {
+        console.log("I'm inside login function")
+        this.hostInfos={}
+        this.hostInfos.hostName=Main.getHostName()
+        this.hostInfos.password=Main.getPassword()
+        console.log(hostName + "" + password);
+        console.log("hostInfos",this.hostInfos);
+        postRequest(this.hostInfos);
+
+
+    },
     
       onResult: function (json) {
-        this.searchButt.disabled = false;
-        
-        Pager.updatePagesCount(json.totalResults);
-        Table.displayLogs(json.results);
+        console.log("post successufully");
+        console.log(json);
       },
     
       onError: function (error) {
-        this.searchButt.disabled = false;
+      
         
-        console.log("Fetch /getlogs failed: ", error);
+        console.log("Fetch /login failed: ", error);
       },
       init: function () {
           var toggle = document.getElementById("toggle");
           var loginButton = document.getElementById("btn");
           loginButton.addEventListener("click", this.onLogin);
-          toggle.addEventListener("click",this.showOrhide)
+          toggle.addEventListener("click",this.showOrhide);
+       
+
   
       }
 
