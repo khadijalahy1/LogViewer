@@ -38,21 +38,81 @@ apt-get -qqy install rsyslog
 echo
 echo "$(date +"%T") |  3/7 :The installation  is done."
 
-#request the ip address of the server from the client:
+#Install dialog + arp-scan
 
-echo "$(date +"%T") |  4/7 :Please enter the server ip address :"
-read  server_ip
-echo "$(date +"%T") |  5/7 :All the Logs of your machine will be moved to the server :"
-echo "$server_ip"
+apt-get -qqy install arp-scan
+apt -qqy install dialog
+
+#request the ip address of the server from the client choose the right ip_address:
+
+#Store the result of the scan command on an array
+arrIps=()
+
+ 
+
+i=0
+ while IFS= read -r line ; do
+    if [ "$i" -ne 0 ]; then
+        arrIps+=("$line");
+         arrIps+=("$i");
+
+
+
+    fi
+    i=$((i+1))
+
+ 
+    
+done<<<$(sudo arp-scan --localnet --numeric --quiet --ignoredups | grep -E '([a-f0-9]{2}:){5}[a-f0-9]{2}' | awk '{print $1}') #scan the entire network
+
+#select dialog
+HEIGHT=15
+WIDTH=40
+CHOICE_HEIGHT=4
+BACKTITLE="Server IP address"
+TITLE="Server Ip address"
+MENU="Choose one of the following Ip address:"
+
+
+
+CHOICE=$(dialog --clear \
+                --backtitle "$BACKTITLE" \
+                --title "$TITLE" \
+                --menu "$MENU" \
+                $HEIGHT $WIDTH $CHOICE_HEIGHT \
+                "${arrIps[@]}" \
+                2>&1 >/dev/tty)
+
+clear
+
+server_ip=$CHOICE
 
 ############## Step2:Update the file /etc/rsyslog.conf ###############################################################
 
 FILE="/etc/rsyslog.conf"
+ipExist=false;
 
 #check if the ip_address already exists in  the /etc/rsyslog.conf or not:
 
+
+while read -r line; do
+
+    [[ "$line" = "#"* ]]&& continue  #check if a line is not a comment 
+    if grep -q "$server_ip" $line; then  #check if the line contains the ip
+        ipExist=true   
+        break;
+    fi
+       
+        
+        
+done <<<$(cat /etc/rsyslog.conf) 
+
+
+
 #the config is already done and we should exit the program
-if grep -q "$server_ip" /etc/rsyslog.conf; then
+if $ipExist; then
+
+
        
         echo 'the server entered is already associated to your machine nothing to be done.'
         exit 
@@ -71,13 +131,9 @@ else
 	echo     ")">>/etc/rsyslog.conf
 
 fi
+
 #reconfigure rsyslog
-echo "$(date +"%T") |6/7 : ready to forword logs to the server."
+echo "$(date +"%T") |6/7 : ready to forword logs to the server: '$server_ip'"
 systemctl restart rsyslog
 echo "$(date +"%T") |7/7 : The setup is done."
-#
-# Done, Alhamulillah.
-#
-#
-# Done, Alhamulillah.
-#
+#Al hamdulillah
