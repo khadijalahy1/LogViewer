@@ -93,19 +93,19 @@ FILE="/etc/rsyslog.conf"
 ipExist=false;
 
 #check if the ip_address already exists in  the /etc/rsyslog.conf or not:
-
-
 while read -r line; do
 
-    [[ "$line" = "#"* ]]&& continue  #check if a line is not a comment 
-    if grep -q "$server_ip" $line; then  #check if the line contains the ip
-        ipExist=true   
+    [[ "$line" = "#"* ]]&& continue
+    if  grep -q "target='$server_ip'" $line  ||  grep -q "@'$server_ip'" $line  ||  grep -q "@@'$server_ip'" $line ; then
+        ipExist=true
         break;
     fi
-       
-        
-        
-done <<<$(cat /etc/rsyslog.conf) 
+
+
+
+done <<<$(cat /etc/rsyslog.conf)  
+
+
 
 
 
@@ -136,4 +136,3 @@ fi
 echo "$(date +"%T") |6/7 : ready to forword logs to the server: '$server_ip'"
 systemctl restart rsyslog
 echo "$(date +"%T") |7/7 : The setup is done."
-#Al hamdulillah
